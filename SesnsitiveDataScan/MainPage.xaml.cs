@@ -38,7 +38,7 @@ namespace SesnsitiveDataScan
                     content = await reader.ReadToEndAsync();
                 }
 
-                if (FileContentLabel != null) // Add a null check for safety
+                if (FileContentLabel != null)
                 {
                     FileContentLabel.Text = content.Length > 500
                         ? content.Substring(0, 500) + "..."
