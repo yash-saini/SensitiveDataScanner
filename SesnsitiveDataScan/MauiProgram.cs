@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using SesnsitiveDataScan.Services;
 
 namespace SesnsitiveDataScan
 {
@@ -15,8 +16,10 @@ namespace SesnsitiveDataScan
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
 
+            builder.Services.AddSingleton<AppDbContext>();
+
 #if DEBUG
-    		builder.Logging.AddDebug();
+            builder.Logging.AddDebug();
 #endif
 
             return builder.Build();
