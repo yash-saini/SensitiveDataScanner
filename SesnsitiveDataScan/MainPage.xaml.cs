@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using SesnsitiveDataScan.Services;
+using System.Text;
 
 namespace SesnsitiveDataScan
 {
@@ -47,6 +48,19 @@ namespace SesnsitiveDataScan
                 else
                 {
                     Console.WriteLine("FileContentLabel not found. Content: " + (content.Length > 500 ? content.Substring(0, 500) + "..." : content));
+                }
+
+                // Run detection
+                var findings = DetectionService.DetectSensitiveData(content);
+
+                if (findings.Count == 0)
+                {
+                    await DisplayAlert("Scan Complete", "No sensitive data detected.", "OK");
+                }
+                else
+                {
+                    var report = string.Join("\n", findings.Select(f => $"{f.Type}: {f.Value}"));
+                    await DisplayAlert("Sensitive Data Found", report, "OK");
                 }
             }
             catch (Exception ex)
