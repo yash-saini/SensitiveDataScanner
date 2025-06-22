@@ -18,6 +18,9 @@ namespace SesnsitiveDataScan.ViewModels
         private bool hasDetectedItems;
 
         [ObservableProperty]
+        private string fileName = "No file selected";
+
+        [ObservableProperty]
         private List<string> displayedItems = new();
 
         private List<string> allDetectedItems = new();
@@ -61,6 +64,7 @@ namespace SesnsitiveDataScan.ViewModels
                 allDetectedItems = findings.Select(f => $"{f.Type}: {f.Value}").ToList();
                 DetectedItems = [.. allDetectedItems.Take(100)];
                 DisplayedItems = DetectedItems;
+                FileName = file.FileName;
                 HasDetectedItems = DisplayedItems != null && DisplayedItems.Any();
                 if (!DetectedItems.Any())
                     await Shell.Current.DisplayAlert("Scan Complete", "No sensitive data detected.", "OK");

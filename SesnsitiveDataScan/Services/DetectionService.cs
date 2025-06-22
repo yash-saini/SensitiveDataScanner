@@ -7,8 +7,8 @@
             var sensitiveDataPatterns = new List<(string Type, string Pattern)>
             {
                 ("Email", @"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"),
-                ("Phone", @"\+?[0-9\s\-\(\)]+"),
-                ("Credit Card", @"\b(?:\d{4}[ -]?){3}\d{4}\b"),
+                ("Phone", @"(?<!\d)(?:\+?\d{1,3}[-.\s]?)?(?:\(?\d{3}\)?[-.\s]?)\d{3}[-.\s]?\d{4}(?!\d)"),
+                ("Credit Card", @"\b(?:\d[ -]*?){13,16}\b"),
                 ("SSN", @"\b\d{3}-\d{2}-\d{4}\b")
             };
 
