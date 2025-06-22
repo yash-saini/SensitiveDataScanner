@@ -30,7 +30,7 @@
 
             <Button Text="Export All Results"
                 Command="{Binding ExportAllResultsCommand}"
-                IsVisible="True"
+                IsVisible="{Binding HasDetectedItems}"
                 HorizontalOptions="Center"
                 VerticalOptions="End" />
 

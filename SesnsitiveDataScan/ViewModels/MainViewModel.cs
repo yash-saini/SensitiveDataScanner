@@ -35,7 +35,6 @@ namespace SesnsitiveDataScan.ViewModels
                 var file = await FilePicker.PickAsync(new PickOptions
                 {
                     PickerTitle = "Select a .txt or .csv file",
-                    // Corrected line:
                     FileTypes = new FilePickerFileType(new Dictionary<DevicePlatform, IEnumerable<string>>
                     {
                         { DevicePlatform.iOS, new[] { "public.plain-text", "public.comma-separated-values" } }, // iOS
