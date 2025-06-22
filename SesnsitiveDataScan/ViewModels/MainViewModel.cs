@@ -22,12 +22,6 @@ namespace SesnsitiveDataScan.ViewModels
 
         private List<string> allDetectedItems = new();
 
-        partial void OnDisplayedItemsChanged(List<string> value)
-        {
-            OnPropertyChanged(nameof(HasDetectedItems));
-        }
-
-
         public MainViewModel()
         {
             FileContent = "No file loaded";

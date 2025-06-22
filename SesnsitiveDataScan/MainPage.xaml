@@ -3,40 +3,37 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="SesnsitiveDataScan.MainPage"
              xmlns:vm="clr-namespace:SesnsitiveDataScan.ViewModels"
-             xmlns:valueConverters="clr-namespace:SesnsitiveDataScan.ValueConverters"
              x:DataType="vm:MainViewModel"
              Title="Sensitive Data Scanner">
 
-    <ContentPage.Resources>
-        <valueConverters:GreaterThanZeroConverter x:Key="GreaterThanZeroConverter"/>
-    </ContentPage.Resources>
-
-
+    <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="20">
 
-        <Button Text="Pick File to Scan"
+            <Button Text="Pick File to Scan"
                 Command="{Binding PickAndScanFileCommand}"
                 HorizontalOptions="Center" />
 
-        <Label x:Name="FileContentLabel"
+            <Label x:Name="FileContentLabel"
                Text="No file loaded"
                LineBreakMode="WordWrap" />
 
-        <Label Text="Detected Sensitive Data:" FontAttributes="Bold" Margin="0,20,0,0"/>
-        <CollectionView ItemsSource="{Binding DetectedItems}">
-            <CollectionView.ItemTemplate>
-                <DataTemplate>
-                    <Label Text="{Binding .}" />
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
+            <Label Text="Detected Sensitive Data:" FontAttributes="Bold" Margin="0,20,0,0"/>
+            <CollectionView ItemsSource="{Binding DetectedItems}"
+                         VerticalOptions="FillAndExpand">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Label Text="{Binding .}" />
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
 
 
-        <Button Text="Export All Results"
+            <Button Text="Export All Results"
                 Command="{Binding ExportAllResultsCommand}"
-                IsVisible="{Binding HasDetectedItems}"
-                HorizontalOptions="Center" />
+                IsVisible="True"
+                HorizontalOptions="Center"
+                VerticalOptions="End" />
 
-    </VerticalStackLayout>
-
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>
