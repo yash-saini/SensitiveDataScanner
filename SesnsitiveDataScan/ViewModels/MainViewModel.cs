@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using SesnsitiveDataScan.Interface;
 using SesnsitiveDataScan.Services;
 using System.Text;
 
@@ -24,8 +25,11 @@ namespace SesnsitiveDataScan.ViewModels
 
         private List<string> allDetectedItems = new();
 
-        public MainViewModel()
+        private readonly IUserDialogService _dialogService;
+
+        public MainViewModel(IUserDialogService dialogService)
         {
+            _dialogService = dialogService;
             FileContent = "No file loaded";
         }
 
@@ -66,11 +70,11 @@ namespace SesnsitiveDataScan.ViewModels
                 FileName = file.FileName;
                 HasDetectedItems = DisplayedItems != null && DisplayedItems.Any();
                 if (!DetectedItems.Any())
-                    await Shell.Current.DisplayAlert("Scan Complete", "No sensitive data detected.", "OK");
+                    await _dialogService.ShowMessage("Scan Complete", "No sensitive data detected.");
             }
             catch (Exception ex)
             {
-                await Shell.Current.DisplayAlert("Error", $"Could not read file: {ex.Message}", "OK");
+                await _dialogService.ShowMessage("Export Successful", $"Saved to:\n{filePath}");
             }
         }
 
