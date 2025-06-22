@@ -3,13 +3,19 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="SesnsitiveDataScan.MainPage"
              xmlns:vm="clr-namespace:SesnsitiveDataScan.ViewModels"
+             xmlns:valueConverters="clr-namespace:SesnsitiveDataScan.ValueConverters"
              x:DataType="vm:MainViewModel"
              Title="Sensitive Data Scanner">
 
-    <VerticalStackLayout Padding="20" Spacing="20">
+    <ContentPage.Resources>
+        <valueConverters:GreaterThanZeroConverter x:Key="GreaterThanZeroConverter"/>
+    </ContentPage.Resources>
+
+
+        <VerticalStackLayout Padding="20" Spacing="20">
 
         <Button Text="Pick File to Scan"
-                Clicked="Button_Clicked"
+                Command="{Binding PickAndScanFileCommand}"
                 HorizontalOptions="Center" />
 
         <Label x:Name="FileContentLabel"
@@ -24,6 +30,13 @@
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
+
+
+        <Button Text="Export All Results"
+                Command="{Binding ExportAllResultsCommand}"
+                IsVisible="{Binding HasDetectedItems}"
+                HorizontalOptions="Center" />
+
     </VerticalStackLayout>
 
 </ContentPage>

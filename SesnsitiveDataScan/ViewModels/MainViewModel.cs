@@ -12,7 +12,21 @@ namespace SesnsitiveDataScan.ViewModels
         private string fileContent;
 
         [ObservableProperty]
-        private ObservableCollection<string> detectedItems = new();
+        private List<string> detectedItems = new();
+
+        [ObservableProperty]
+        private bool hasDetectedItems;
+
+        [ObservableProperty]
+        private List<string> displayedItems = new();
+
+        private List<string> allDetectedItems = new();
+
+        partial void OnDisplayedItemsChanged(List<string> value)
+        {
+            OnPropertyChanged(nameof(HasDetectedItems));
+        }
+
 
         public MainViewModel()
         {
@@ -49,18 +63,36 @@ namespace SesnsitiveDataScan.ViewModels
 
                 FileContent = content.Length > 500 ? content.Substring(0, 500) + "..." : content;
 
-                var findings = DetectionService.DetectSensitiveData(content);
-                DetectedItems.Clear();
+                var findings = await Task.Run(() => DetectionService.DetectSensitiveData(content));
 
-                foreach (var (type, value) in findings)
-                    DetectedItems.Add($"{type}: {value}");
-
-                if (DetectedItems.Count == 0)
+                allDetectedItems = findings.Select(f => $"{f.Type}: {f.Value}").ToList();
+                DetectedItems = [.. allDetectedItems.Take(100)];
+                DisplayedItems = DetectedItems;
+                HasDetectedItems = DisplayedItems != null && DisplayedItems.Any();
+                if (!DetectedItems.Any())
                     await Shell.Current.DisplayAlert("Scan Complete", "No sensitive data detected.", "OK");
             }
             catch (Exception ex)
             {
                 await Shell.Current.DisplayAlert("Error", $"Could not read file: {ex.Message}", "OK");
+            }
+        }
+
+        [RelayCommand]
+        public async Task ExportAllResults()
+        {
+            try
+            {
+                var filename = $"ScanResults_{DateTime.Now:yyyyMMdd_HHmmss}.txt";
+                var filePath = Path.Combine(FileSystem.AppDataDirectory, filename);
+
+                await File.WriteAllLinesAsync(filePath, allDetectedItems);
+
+                await Shell.Current.DisplayAlert("Export Successful", $"Saved to:\n{filePath}", "OK");
+            }
+            catch (Exception ex)
+            {
+                await Shell.Current.DisplayAlert("Export Failed", ex.Message, "OK");
             }
         }
     }
