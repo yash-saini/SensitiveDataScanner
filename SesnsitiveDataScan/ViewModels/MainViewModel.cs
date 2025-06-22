@@ -1,7 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SesnsitiveDataScan.Services;
-using System.Collections.ObjectModel;
 using System.Text;
 
 namespace SesnsitiveDataScan.ViewModels
