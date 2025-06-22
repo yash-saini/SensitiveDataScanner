@@ -6,24 +6,34 @@
              x:DataType="vm:MainViewModel"
              Title="Sensitive Data Scanner">
 
-    <VerticalStackLayout Padding="20" Spacing="20">
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="20">
 
-        <Button Text="Pick File to Scan"
-                Clicked="Button_Clicked"
+            <Button Text="Pick File to Scan"
+                Command="{Binding PickAndScanFileCommand}"
                 HorizontalOptions="Center" />
 
-        <Label x:Name="FileContentLabel"
+            <Label x:Name="FileContentLabel"
                Text="No file loaded"
                LineBreakMode="WordWrap" />
 
-        <Label Text="Detected Sensitive Data:" FontAttributes="Bold" Margin="0,20,0,0"/>
-        <CollectionView ItemsSource="{Binding DetectedItems}">
-            <CollectionView.ItemTemplate>
-                <DataTemplate>
-                    <Label Text="{Binding .}" />
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
-    </VerticalStackLayout>
+            <Label Text="Detected Sensitive Data:" FontAttributes="Bold" Margin="0,20,0,0"/>
+            <CollectionView ItemsSource="{Binding DetectedItems}"
+                         VerticalOptions="FillAndExpand">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Label Text="{Binding .}" />
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
 
+
+            <Button Text="Export All Results"
+                Command="{Binding ExportAllResultsCommand}"
+                IsVisible="True"
+                HorizontalOptions="Center"
+                VerticalOptions="End" />
+
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>
