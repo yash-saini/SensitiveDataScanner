@@ -74,7 +74,7 @@ namespace SesnsitiveDataScan.ViewModels
             }
             catch (Exception ex)
             {
-                await _dialogService.ShowMessage("Export Successful", $"Saved to:\n{filePath}");
+                await _dialogService.ShowMessage("Error", $"Could not read file: {ex.Message}", "OK");
             }
         }
 
@@ -88,11 +88,11 @@ namespace SesnsitiveDataScan.ViewModels
 
                 await File.WriteAllLinesAsync(filePath, allDetectedItems);
 
-                await Shell.Current.DisplayAlert("Export Successful", $"Saved to:\n{filePath}", "OK");
+                await _dialogService.ShowMessage("Export Successful", $"Saved to:\n{filePath}", "OK");
             }
             catch (Exception ex)
             {
-                await Shell.Current.DisplayAlert("Export Failed", ex.Message, "OK");
+                await _dialogService.ShowMessage("Export Failed", ex.Message, "OK");
             }
         }
     }
