@@ -33,5 +33,11 @@
                 HorizontalOptions="Center"
                 VerticalOptions="End" />
 
-        </VerticalStackLayout>
+        <Button Text="Export Masked Results"
+                Command="{Binding ExportRedactResultsCommand}"
+                IsVisible="{Binding HasDetectedItems}"
+                HorizontalOptions="Center"
+                VerticalOptions="End" />
+
+    </VerticalStackLayout>
 </ContentPage>
