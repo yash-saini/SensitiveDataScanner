@@ -5,6 +5,17 @@ namespace SesnsitiveDataScan.Utilities
 {
     public static class MaskingUtils
     {
+        public static string MaskData(string type, string value)
+        {
+            return type switch
+            {
+                "Email" => MaskEmail(value),
+                "SSN" => MaskSSN(value),
+                "Credit Card" => MaskCreditCard(value),
+                _ => new string('*', value.Length)
+            };
+        }
+
         public static string MaskEmail(string email)
         {
             int atIndex = email.IndexOf('@');

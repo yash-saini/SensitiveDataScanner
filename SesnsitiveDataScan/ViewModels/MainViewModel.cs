@@ -1,7 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SesnsitiveDataScan.Interface;
+using SesnsitiveDataScan.Models;
 using SesnsitiveDataScan.Services;
+using SesnsitiveDataScan.Utilities;
+using System.Collections.ObjectModel;
 using System.Text;
 
 namespace SesnsitiveDataScan.ViewModels
@@ -12,7 +15,10 @@ namespace SesnsitiveDataScan.ViewModels
         private string fileContent;
 
         [ObservableProperty]
-        private List<string> detectedItems = new();
+        ObservableCollection<DetectedItem> detectedItems = new();
+
+        [ObservableProperty]
+        string filterText;
 
         [ObservableProperty]
         private bool hasDetectedItems;
@@ -29,6 +35,18 @@ namespace SesnsitiveDataScan.ViewModels
         private List<string> allDetectedItems = new();
 
         private readonly IUserDialogService _dialogService;
+
+        public IEnumerable<DetectedItem> FilteredDetectedItems =>
+                string.IsNullOrWhiteSpace(FilterText)
+                    ? DetectedItems
+                    : DetectedItems.Where(i =>
+                        i.Original.ToLowerInvariant().StartsWith(FilterText.ToLowerInvariant()) ||
+                        i.Masked.ToLowerInvariant().StartsWith(FilterText.ToLowerInvariant()));
+
+        partial void OnFilterTextChanged(string oldValue, string newValue)
+        {
+            OnPropertyChanged(nameof(FilteredDetectedItems));
+        }
 
         public MainViewModel(IUserDialogService dialogService)
         {
@@ -62,18 +80,23 @@ namespace SesnsitiveDataScan.ViewModels
                 {
                     content = await reader.ReadToEndAsync();
                 }
-
                 FileContent = content.Length > 500 ? content.Substring(0, 500) + "..." : content;
-
-                var findings = await Task.Run(() => DetectionService.DetectSensitiveData(content));
-
-                allDetectedItems = findings.Select(f => $"{f.Type}: {f.Value}").ToList();
-                DetectedItems = [.. allDetectedItems.Take(100)];
-                DisplayedItems = DetectedItems;
                 FileName = file.FileName;
-                HasDetectedItems = DisplayedItems != null && DisplayedItems.Any();
 
-                if (!DetectedItems.Any())
+                var redactionResult = await Task.Run(() => DetectionService.DetectAndRedactSensitiveData(content));
+                RedactedContent = redactionResult.RedactedContent;
+
+                DetectedItems = new ObservableCollection<DetectedItem>(
+                    redactionResult.DetectedItems.Select(d => new DetectedItem
+                    {
+                        Original = d.Value,
+                        Masked = MaskingUtils.MaskData(d.Type, d.Value)
+                    }));
+                OnPropertyChanged(nameof(FilteredDetectedItems));
+
+                HasDetectedItems = DetectedItems.Any();
+
+                if (!HasDetectedItems)
                     await _dialogService.ShowMessage("Scan Complete", "No sensitive data detected.");
             }
             catch (Exception ex)
@@ -93,9 +116,6 @@ namespace SesnsitiveDataScan.ViewModels
                     return;
                 }
 
-                var redactionResult = await Task.Run(() => DetectionService.DetectAndRedactSensitiveData(FileContent));
-                RedactedContent = redactionResult.RedactedContent;
-
                 var lines = new List<string>
                     {
                         $"Original File: {FileName}",
@@ -103,12 +123,7 @@ namespace SesnsitiveDataScan.ViewModels
                         "Detected Sensitive Items (Type | Original -> Masked):"
                     };
 
-                lines.AddRange(redactionResult.DetectedItems.Select(i =>
-                {
-                    var masked = new string('*', i.Value.Length);
-                    return $"{i.Type} | {i.Value} -> {masked}";
-                }));
-
+                lines.AddRange(DetectedItems.Select(i => $"{i.Original} -> {i.Masked}"));
                 lines.Add("");
                 lines.Add("---- REDACTED CONTENT ----");
                 lines.Add(RedactedContent);
@@ -117,7 +132,6 @@ namespace SesnsitiveDataScan.ViewModels
                 var filePath = Path.Combine(FileSystem.AppDataDirectory, filename);
 
                 await File.WriteAllLinesAsync(filePath, lines);
-
                 await _dialogService.ShowMessage("Export Successful", $"Saved to:\n{filePath}", "OK");
             }
             catch (Exception ex)
