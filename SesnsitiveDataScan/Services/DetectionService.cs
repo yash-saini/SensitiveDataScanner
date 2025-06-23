@@ -1,4 +1,6 @@
 ﻿using SesnsitiveDataScan.Models;
+using SesnsitiveDataScan.Utilities;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace SesnsitiveDataScan.Services
@@ -39,8 +41,16 @@ namespace SesnsitiveDataScan.Services
             {
                 redactedContent = Regex.Replace(redactedContent, pattern, match =>
                 {
-                    detectedData.Add((type, match.Value));
-                    return new string('*', match.Length);
+                    var value = match.Value;
+                    detectedData.Add((type, value));
+
+                    return type switch
+                    {
+                        "Email" => MaskingUtils.MaskEmail(value),
+                        "SSN" => MaskingUtils.MaskSSN(value),
+                        "Credit Card" => MaskingUtils.MaskCreditCard(value),
+                        _ => new string('*', value.Length)
+                    };
                 });
             }
 
