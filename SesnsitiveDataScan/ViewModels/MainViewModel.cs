@@ -15,9 +15,6 @@ namespace SesnsitiveDataScan.ViewModels
         private List<string> detectedItems = new();
 
         [ObservableProperty]
-        private List<string> maskedDetectedItems = new();
-
-        [ObservableProperty]
         private bool hasDetectedItems;
 
         [ObservableProperty]
@@ -84,47 +81,6 @@ namespace SesnsitiveDataScan.ViewModels
                 await _dialogService.ShowMessage("Error", $"Could not read file: {ex.Message}", "OK");
             }
         }
-
-        //    [RelayCommand]
-        //    public async Task ExportAllResults()
-        //    {
-        //        try
-        //        {
-        //            var filename = $"ScanResults_{DateTime.Now:yyyyMMdd_HHmmss}.txt";
-        //            var filePath = Path.Combine(FileSystem.AppDataDirectory, filename);
-
-        //            await File.WriteAllLinesAsync(filePath, allDetectedItems);
-
-        //            await _dialogService.ShowMessage("Export Successful", $"Saved to:\n{filePath}", "OK");
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            await _dialogService.ShowMessage("Export Failed", ex.Message, "OK");
-        //        }
-        //    }
-
-        //    [RelayCommand]
-        //    public async Task ExportRedactResults()
-        //    {
-        //        try
-        //        {
-        //            if (string.IsNullOrEmpty(FileContent) || FileContent == "No file loaded")
-        //            {
-        //                await _dialogService.ShowMessage("Error", "No file content to redact.", "OK");
-        //                return;
-        //            }
-        //            var redactionResult = await Task.Run(() => DetectionService.DetectAndRedactSensitiveData(FileContent));
-        //            RedactedContent = redactionResult.RedactedContent;
-        //            var filename = $"Redacted_{DateTime.Now:yyyyMMdd_HHmmss}.txt";
-        //            var filePath = Path.Combine(FileSystem.AppDataDirectory, filename);
-        //            await File.WriteAllTextAsync(filePath, RedactedContent);
-        //            await _dialogService.ShowMessage("Redaction Complete", $"Redacted file saved to:\n{filePath}", "OK");
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            await _dialogService.ShowMessage("Redaction Failed", ex.Message, "OK");
-        //        }
-        //    }
 
         [RelayCommand]
         public async Task ExportResults()
