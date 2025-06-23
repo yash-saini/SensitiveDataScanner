@@ -1,7 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using SesnsitiveDataScan.Interface;
 using SesnsitiveDataScan.Services;
-using System.Collections.ObjectModel;
 using System.Text;
 
 namespace SesnsitiveDataScan.ViewModels
@@ -18,12 +18,21 @@ namespace SesnsitiveDataScan.ViewModels
         private bool hasDetectedItems;
 
         [ObservableProperty]
+        private string fileName = "No file selected";
+
+        [ObservableProperty]
+        private string redactedContent;
+
+        [ObservableProperty]
         private List<string> displayedItems = new();
 
         private List<string> allDetectedItems = new();
 
-        public MainViewModel()
+        private readonly IUserDialogService _dialogService;
+
+        public MainViewModel(IUserDialogService dialogService)
         {
+            _dialogService = dialogService;
             FileContent = "No file loaded";
         }
 
@@ -61,31 +70,59 @@ namespace SesnsitiveDataScan.ViewModels
                 allDetectedItems = findings.Select(f => $"{f.Type}: {f.Value}").ToList();
                 DetectedItems = [.. allDetectedItems.Take(100)];
                 DisplayedItems = DetectedItems;
+                FileName = file.FileName;
                 HasDetectedItems = DisplayedItems != null && DisplayedItems.Any();
+
                 if (!DetectedItems.Any())
-                    await Shell.Current.DisplayAlert("Scan Complete", "No sensitive data detected.", "OK");
+                    await _dialogService.ShowMessage("Scan Complete", "No sensitive data detected.");
             }
             catch (Exception ex)
             {
-                await Shell.Current.DisplayAlert("Error", $"Could not read file: {ex.Message}", "OK");
+                await _dialogService.ShowMessage("Error", $"Could not read file: {ex.Message}", "OK");
             }
         }
 
         [RelayCommand]
-        public async Task ExportAllResults()
+        public async Task ExportResults()
         {
             try
             {
-                var filename = $"ScanResults_{DateTime.Now:yyyyMMdd_HHmmss}.txt";
+                if (string.IsNullOrEmpty(FileContent) || FileContent == "No file loaded")
+                {
+                    await _dialogService.ShowMessage("Error", "No file content to export.", "OK");
+                    return;
+                }
+
+                var redactionResult = await Task.Run(() => DetectionService.DetectAndRedactSensitiveData(FileContent));
+                RedactedContent = redactionResult.RedactedContent;
+
+                var lines = new List<string>
+                    {
+                        $"Original File: {FileName}",
+                        "",
+                        "Detected Sensitive Items (Type | Original -> Masked):"
+                    };
+
+                lines.AddRange(redactionResult.DetectedItems.Select(i =>
+                {
+                    var masked = new string('*', i.Value.Length);
+                    return $"{i.Type} | {i.Value} -> {masked}";
+                }));
+
+                lines.Add("");
+                lines.Add("---- REDACTED CONTENT ----");
+                lines.Add(RedactedContent);
+
+                var filename = $"ScanAndRedacted_{DateTime.Now:yyyyMMdd_HHmmss}.txt";
                 var filePath = Path.Combine(FileSystem.AppDataDirectory, filename);
 
-                await File.WriteAllLinesAsync(filePath, allDetectedItems);
+                await File.WriteAllLinesAsync(filePath, lines);
 
-                await Shell.Current.DisplayAlert("Export Successful", $"Saved to:\n{filePath}", "OK");
+                await _dialogService.ShowMessage("Export Successful", $"Saved to:\n{filePath}", "OK");
             }
             catch (Exception ex)
             {
-                await Shell.Current.DisplayAlert("Export Failed", ex.Message, "OK");
+                await _dialogService.ShowMessage("Export Failed", ex.Message, "OK");
             }
         }
     }

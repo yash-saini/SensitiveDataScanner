@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using SesnsitiveDataScan.Interface;
 using SesnsitiveDataScan.Services;
 using SesnsitiveDataScan.ViewModels;
 
@@ -20,6 +21,7 @@ namespace SesnsitiveDataScan
             builder.Services.AddSingleton<AppDbContext>();
             builder.Services.AddSingleton<MainViewModel>();
             builder.Services.AddSingleton<MainPage>();
+            builder.Services.AddSingleton<IUserDialogService, UserDialogService>();
 
 #if DEBUG
             builder.Logging.AddDebug();

@@ -3,37 +3,56 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="SesnsitiveDataScan.MainPage"
              xmlns:vm="clr-namespace:SesnsitiveDataScan.ViewModels"
+             xmlns:valueConverter ="clr-namespace:SesnsitiveDataScan.ValueConverter"
              x:DataType="vm:MainViewModel"
              Title="Sensitive Data Scanner">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="20" Spacing="20">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <valueConverter:MaskingConverter x:Key="MaskingConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <VerticalStackLayout Padding="20" Spacing="20">
 
             <Button Text="Pick File to Scan"
                 Command="{Binding PickAndScanFileCommand}"
                 HorizontalOptions="Center" />
 
-            <Label x:Name="FileContentLabel"
-               Text="No file loaded"
-               LineBreakMode="WordWrap" />
+        <HorizontalStackLayout>
+            <Label Text="File Name:" FontAttributes="Bold" />
+            <Label Text="{Binding FileName}" LineBreakMode="TailTruncation" Margin="10,0,0,0" />
+        </HorizontalStackLayout>
 
-            <Label Text="Detected Sensitive Data:" FontAttributes="Bold" Margin="0,20,0,0"/>
-            <CollectionView ItemsSource="{Binding DetectedItems}"
-                         VerticalOptions="FillAndExpand">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <Label Text="{Binding .}" />
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
+        <Label Text="Detected Sensitive Data:" FontAttributes="Bold" Margin="0,20,0,0" />
 
+        <!-- Column Headers -->
+        <Grid ColumnDefinitions="2*,1.5*" Padding="4,0" Margin="0,0,0,4">
+            <Label Text="Original" FontAttributes="Bold" Grid.Column="0" />
+            <Label Text="Masked" FontAttributes="Bold" Grid.Column="1" />
+        </Grid>
 
-            <Button Text="Export All Results"
-                Command="{Binding ExportAllResultsCommand}"
+        <!-- Detected Items List -->
+        <CollectionView ItemsSource="{Binding DetectedItems}" MaximumHeightRequest="200">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Grid ColumnDefinitions="2*,1.5*" ColumnSpacing="6" Padding="4,2">
+                        <!-- Original Detected Value -->
+                        <Label Text="{Binding}" Grid.Column="0" LineBreakMode="TailTruncation" />
+                        <!-- Masked Version -->
+                        <Label Text="{Binding ., Converter={StaticResource MaskingConverter}}"
+                       Grid.Column="1"
+                       TextColor="Gray"/>
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <Button Text="Export Detected + Masked Results"
+                Command="{Binding ExportResultsCommand}"
                 IsVisible="{Binding HasDetectedItems}"
                 HorizontalOptions="Center"
                 VerticalOptions="End" />
 
-        </VerticalStackLayout>
-    </ScrollView>
+    </VerticalStackLayout>
 </ContentPage>
