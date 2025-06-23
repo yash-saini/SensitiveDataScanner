@@ -40,8 +40,8 @@ namespace SesnsitiveDataScan.ViewModels
                 string.IsNullOrWhiteSpace(FilterText)
                     ? DetectedItems
                     : DetectedItems.Where(i =>
-                        i.Original.ToString().ToLower().StartsWith(FilterText.ToLower()) ||
-                        i.Masked.ToString().ToLower().StartsWith(FilterText.ToLower()));
+                        i.Original.ToLowerInvariant().StartsWith(FilterText.ToLowerInvariant()) ||
+                        i.Masked.ToLowerInvariant().StartsWith(FilterText.ToLowerInvariant()));
 
         partial void OnFilterTextChanged(string oldValue, string newValue)
         {
