@@ -21,6 +21,9 @@ namespace SesnsitiveDataScan.ViewModels
         string filterText;
 
         [ObservableProperty]
+        bool isBusy;
+
+        [ObservableProperty]
         private bool hasDetectedItems;
 
         [ObservableProperty]
@@ -57,6 +60,7 @@ namespace SesnsitiveDataScan.ViewModels
         [RelayCommand]
         public async Task PickAndScanFile()
         {
+            IsBusy = true;
             try
             {
                 var file = await FilePicker.PickAsync(new PickOptions
@@ -90,7 +94,8 @@ namespace SesnsitiveDataScan.ViewModels
                     redactionResult.DetectedItems.Select(d => new DetectedItem
                     {
                         Original = d.Value,
-                        Masked = MaskingUtils.MaskData(d.Type, d.Value)
+                        Masked = MaskingUtils.MaskData(d.Type, d.Value),
+                        Type = d.Type
                     }));
                 OnPropertyChanged(nameof(FilteredDetectedItems));
 
@@ -102,6 +107,10 @@ namespace SesnsitiveDataScan.ViewModels
             catch (Exception ex)
             {
                 await _dialogService.ShowMessage("Error", $"Could not read file: {ex.Message}", "OK");
+            }
+            finally
+            {
+                IsBusy = false;
             }
         }
 

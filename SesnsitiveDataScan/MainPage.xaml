@@ -29,12 +29,15 @@
 
     <!-- Main layout grid: upper content + lower button -->
     <Grid RowDefinitions="Auto, *, Auto">
-
         <!-- Header and filter content (fixed) -->
         <VerticalStackLayout Grid.Row="0" Padding="20" Spacing="20">
             <Button Text="Pick File to Scan"
                     Command="{Binding PickAndScanFileCommand}"
-                    HorizontalOptions="Center" />
+                    BackgroundColor="#007acc"
+                    TextColor="White"
+                    CornerRadius="6"
+                    HeightRequest="45"
+                    HorizontalOptions="Center"/>
 
             <HorizontalStackLayout>
                 <Label Text="File Name:" FontAttributes="Bold" />
@@ -45,27 +48,52 @@
 
             <!-- Filter Bar -->
             <HorizontalStackLayout Spacing="10" Padding="4,0">
-                <Label Text="Filter:" VerticalOptions="Center" />
                 <Entry Placeholder="Type to filter..."
                        Text="{Binding FilterText, Mode=TwoWay}"
-                       WidthRequest="200" />
+                       WidthRequest="250"
+                       BackgroundColor="#f0f0f0"
+                       FontAttributes="Italic"
+                       HeightRequest="35"
+                       Margin="0,5" />
             </HorizontalStackLayout>
 
-            <!-- Column Headers -->
-            <Grid ColumnDefinitions="2*,1.5*" Padding="4,0" Margin="0,0,0,4">
-                <Label Text="Original" FontAttributes="Bold" Grid.Column="0" />
-                <Label Text="Masked" FontAttributes="Bold" Grid.Column="1" />
+            <!-- Column Headers with fixed widths to match data columns -->
+            <Grid ColumnDefinitions="100, 2*, 1.5*" ColumnSpacing="20" Padding="4,0" Margin="0,0,0,4">
+                <Label Text="Type" FontAttributes="Bold" Grid.Column="0" />
+                <Label Text="Original" FontAttributes="Bold" Grid.Column="1" />
+                <Label Text="Masked" FontAttributes="Bold" Grid.Column="2" />
             </Grid>
         </VerticalStackLayout>
 
         <!-- Scrollable CollectionView only -->
         <ScrollView Grid.Row="1">
+            <!-- CollectionView -->
             <CollectionView ItemsSource="{Binding FilteredDetectedItems}">
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="models:DetectedItem">
-                        <Grid ColumnDefinitions="2*,1.5*" ColumnSpacing="12" Padding="4">
-                            <Label Text="{Binding Original}" Grid.Column="0" LineBreakMode="TailTruncation"/>
-                            <Label Text="{Binding Masked}" Grid.Column="1" TextColor="Gray"/>
+                        <Grid ColumnDefinitions="100, 2*, 1.5*" ColumnSpacing="20" Padding="4">
+                            <!-- Type Label with background -->
+                            <Frame BackgroundColor="LightGray"
+                                   Padding="8,4"
+                                   Margin="0,2"
+                                   CornerRadius="4"
+                                   HasShadow="False"
+                                   Grid.Column="0"
+                                   HorizontalOptions="Start"
+                                   WidthRequest="90"
+                                   VerticalOptions="Center">
+                                <Label Text="{Binding Type}" 
+                                       FontSize="12" 
+                                       HorizontalOptions="Center" />
+                            </Frame>
+                            <Label Text="{Binding Original}" 
+                                   Grid.Column="1" 
+                                   LineBreakMode="TailTruncation"
+                                   VerticalOptions="Center"/>
+                            <Label Text="{Binding Masked}" 
+                                   Grid.Column="2" 
+                                   TextColor="Gray"
+                                   VerticalOptions="Center"/>
                         </Grid>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
@@ -79,8 +107,39 @@
             <Button Text="Export Detected + Masked Results"
                     Command="{Binding ExportResultsCommand}"
                     IsVisible="{Binding HasDetectedItems}"
-                    HorizontalOptions="Center" />
+                    BackgroundColor="#007acc"
+                    TextColor="White"
+                    CornerRadius="6"
+                    HeightRequest="45"
+                    HorizontalOptions="Center"/>
         </VerticalStackLayout>
 
+        <!-- Busy indicator overlay -->
+        <Grid IsVisible="{Binding IsBusy}"
+              BackgroundColor="#80000000"
+              InputTransparent="False"
+              Grid.RowSpan="3"
+              ZIndex="99">
+            <VerticalStackLayout HorizontalOptions="Center" 
+                                VerticalOptions="Center" 
+                                Spacing="15">
+                <Frame CornerRadius="10" 
+                       BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark=#333333}"
+                       HasShadow="True"
+                       Padding="30">
+                    <VerticalStackLayout Spacing="15">
+                        <ActivityIndicator IsRunning="True"
+                                          Color="#007acc"
+                                          WidthRequest="50"
+                                          HeightRequest="50"
+                                          HorizontalOptions="Center"/>
+                        <Label Text="Processing file..."
+                              FontAttributes="Bold"
+                              HorizontalOptions="Center"
+                              TextColor="{AppThemeBinding Light=#333333, Dark={StaticResource White}}"/>
+                    </VerticalStackLayout>
+                </Frame>
+            </VerticalStackLayout>
+        </Grid>
     </Grid>
 </ContentPage>
