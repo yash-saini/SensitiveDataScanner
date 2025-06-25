@@ -133,7 +133,7 @@
                                           WidthRequest="50"
                                           HeightRequest="50"
                                           HorizontalOptions="Center"/>
-                        <Label Text="Processing file..."
+                        <Label Text="Please wait..."
                               FontAttributes="Bold"
                               HorizontalOptions="Center"
                               TextColor="{AppThemeBinding Light=#333333, Dark={StaticResource White}}"/>
