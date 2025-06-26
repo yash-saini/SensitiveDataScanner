@@ -68,10 +68,16 @@
             </HorizontalStackLayout>
 
             <HorizontalStackLayout Grid.Row="2"
-                       Grid.ColumnSpan="2"
-                       Spacing="15"
-                       HorizontalOptions="End"
-                       Margin="0,10,0,0">
+                           Grid.ColumnSpan="2"
+                           Spacing="10"
+                           HorizontalOptions="End"
+                           Margin="0,10,0,0">
+                <!-- Light mode label and icon -->
+                <Label Text="Light" 
+                           VerticalOptions="Center"
+                           FontSize="12"
+                           Opacity="{Binding IsDarkMode, Converter={StaticResource InvertBoolConverter}}" />
+
                 <Grid WidthRequest="50" HeightRequest="30">
                     <Image Source="sun.png"
                            WidthRequest="24"
@@ -95,6 +101,12 @@
                         </Image.GestureRecognizers>
                     </Image>
                 </Grid>
+
+                <!-- Dark mode label -->
+                <Label Text="Dark" 
+                           VerticalOptions="Center"
+                           FontSize="12"
+                           Opacity="{Binding IsDarkMode}" />
             </HorizontalStackLayout>
         </Grid>
 
@@ -204,8 +216,8 @@
                                      IsChecked="{Binding UseFullRedaction}"
                                      GroupName="RedactionStyle"/>
                                 <Label Grid.Row="1" Grid.Column="1"
-                               Text="Full Redaction (completely mask all data)" 
-                               VerticalOptions="Center">
+                                       Text="Full Redaction (completely mask all data)" 
+                                       VerticalOptions="Center">
                                     <Label.GestureRecognizers>
                                         <TapGestureRecognizer Command="{Binding SetFullRedactionCommand}" />
                                     </Label.GestureRecognizers>
