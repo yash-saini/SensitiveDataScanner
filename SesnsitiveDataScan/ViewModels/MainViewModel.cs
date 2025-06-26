@@ -6,11 +6,33 @@ using SesnsitiveDataScan.Services;
 using SesnsitiveDataScan.Utilities;
 using System.Collections.ObjectModel;
 using System.Text;
+using System.Windows.Input;
 
 namespace SesnsitiveDataScan.ViewModels
 {
     public partial class MainViewModel : ObservableObject
     {
+        [ObservableProperty]
+        private bool showSettingsPanel = false;
+
+        [ObservableProperty]
+        private bool scanEmails = true;
+
+        [ObservableProperty]
+        private bool scanSSNs = true;
+
+        [ObservableProperty]
+        private bool scanCreditCards = true;
+
+        [ObservableProperty]
+        private bool scanPhones = true;
+
+        [ObservableProperty]
+        private bool usePartialMasking = true;
+
+        // Redaction mode
+        [ObservableProperty] bool useFullRedaction;
+
         [ObservableProperty]
         private string fileContent;
 
@@ -35,8 +57,6 @@ namespace SesnsitiveDataScan.ViewModels
         [ObservableProperty]
         private List<string> displayedItems = new();
 
-        private List<string> allDetectedItems = new();
-
         private readonly IUserDialogService _dialogService;
 
         public IEnumerable<DetectedItem> FilteredDetectedItems =>
@@ -51,10 +71,59 @@ namespace SesnsitiveDataScan.ViewModels
             OnPropertyChanged(nameof(FilteredDetectedItems));
         }
 
+        public ICommand ScanEmailsToggleCommand { get; }
+        public ICommand ScanPhonesToggleCommand { get; }
+        public ICommand ScanSSNsToggleCommand { get; }
+        public ICommand ScanCreditCardsToggleCommand { get; }
+        public ICommand SetPartialMaskingCommand { get; }
+        public ICommand SetFullRedactionCommand { get; }
+
         public MainViewModel(IUserDialogService dialogService)
         {
             _dialogService = dialogService;
             FileContent = "No file loaded";
+            ScanEmailsToggleCommand = new Command(ToggleScanEmails);
+            ScanPhonesToggleCommand = new Command(ToggleScanPhones);
+            ScanSSNsToggleCommand = new Command(ToggleScanSSNs);
+            ScanCreditCardsToggleCommand = new Command(ToggleScanCreditCards);
+            SetPartialMaskingCommand = new Command(SetPartialMasking);
+            SetFullRedactionCommand = new Command(SetFullRedaction);
+        }
+
+        private void ToggleScanEmails()
+        {
+            // Logic to toggle ScanEmails
+            ScanEmails = !ScanEmails;
+            OnPropertyChanged(nameof(ScanEmails));
+        }
+        private void ToggleScanPhones()
+        {
+            ScanPhones = !ScanPhones;
+            OnPropertyChanged(nameof(ScanPhones));
+        }
+
+        private void ToggleScanSSNs()
+        {
+            ScanSSNs = !ScanSSNs;
+            OnPropertyChanged(nameof(ScanSSNs));
+        }
+
+        private void ToggleScanCreditCards()
+        {
+            ScanCreditCards = !ScanCreditCards;
+            OnPropertyChanged(nameof(ScanCreditCards));
+        }
+
+        private void SetPartialMasking()
+        {
+            UsePartialMasking = true;
+            UseFullRedaction = false;
+        }
+
+        private void SetFullRedaction()
+        {
+            UseFullRedaction = true;
+            UsePartialMasking = false;
         }
 
         [RelayCommand]
@@ -68,33 +137,49 @@ namespace SesnsitiveDataScan.ViewModels
                     PickerTitle = "Select a .txt or .csv file",
                     FileTypes = new FilePickerFileType(new Dictionary<DevicePlatform, IEnumerable<string>>
                     {
-                        { DevicePlatform.iOS, new[] { "public.plain-text", "public.comma-separated-values" } }, // iOS
-                        { DevicePlatform.Android, new[] { "text/plain", "text/csv" } }, // Android
-                        { DevicePlatform.WinUI, new[] { ".txt", ".csv" } }, // Windows
-                        { DevicePlatform.macOS, new[] { "public.plain-text", "public.comma-separated-values" } }, // macOS
+                        { DevicePlatform.iOS, new[] { "com.microsoft.word.doc", "org.openxmlformats.wordprocessingml.document", "org.openxmlformats.spreadsheetml.sheet", "public.plain-text", "public.comma-separated-values" } },
+                        { DevicePlatform.Android, new[] { "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "text/plain", "text/csv" } },
+                        { DevicePlatform.WinUI, new[] { ".txt", ".csv", ".docx", ".xlsx" } },
+                        { DevicePlatform.macOS, new[] { "org.openxmlformats.wordprocessingml.document", "org.openxmlformats.spreadsheetml.sheet", "public.plain-text", "public.comma-separated-values" } },
                     }),
                 });
 
                 if (file == null) return;
 
                 string content = "";
+                string extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+                using var stream = await file.OpenReadAsync();
+                using var memoryStream = new MemoryStream();
+                await stream.CopyToAsync(memoryStream);
+                var fileBytes = memoryStream.ToArray();
 
-                using (var stream = await file.OpenReadAsync())
-                using (var reader = new StreamReader(stream, Encoding.UTF8))
+                if (extension == ".docx")
                 {
-                    content = await reader.ReadToEndAsync();
+                    content = WordTextExtractorUtility.ExtractText(fileBytes);
                 }
+                else if (extension == ".xlsx")
+                {
+                    content = ExcelTextExtractorUtility.ExtractText(fileBytes);
+                }
+                else
+                {
+                    content = Encoding.UTF8.GetString(fileBytes);
+                }
+
                 FileContent = content.Length > 500 ? content.Substring(0, 500) + "..." : content;
                 FileName = file.FileName;
 
-                var redactionResult = await Task.Run(() => DetectionService.DetectAndRedactSensitiveData(content));
+                var redactionResult = await Task.Run(() =>
+                    DetectionService.DetectAndRedactSensitiveData(
+                        content,
+                        ScanEmails, ScanPhones, ScanCreditCards, ScanSSNs,
+                        UseFullRedaction));
                 RedactedContent = redactionResult.RedactedContent;
-
                 DetectedItems = new ObservableCollection<DetectedItem>(
                     redactionResult.DetectedItems.Select(d => new DetectedItem
                     {
                         Original = d.Value,
-                        Masked = MaskingUtils.MaskData(d.Type, d.Value),
+                        Masked = UseFullRedaction ? new string('*', d.Value.Length) : MaskingUtils.MaskData(d.Type, d.Value),
                         Type = d.Type
                     }));
                 OnPropertyChanged(nameof(FilteredDetectedItems));
@@ -146,6 +231,59 @@ namespace SesnsitiveDataScan.ViewModels
             catch (Exception ex)
             {
                 await _dialogService.ShowMessage("Export Failed", ex.Message, "OK");
+            }
+        }
+
+        [RelayCommand]
+        private void ToggleSettings()
+        {
+            ShowSettingsPanel = !ShowSettingsPanel;
+        }
+
+        [RelayCommand]
+        private async Task ApplySettings()
+        {
+            if (string.IsNullOrEmpty(FileContent) || FileContent == "No file loaded")
+            {
+                await _dialogService.ShowMessage("Info", "Please select a file first.", "OK");
+                return;
+            }
+
+            // Hide the settings panel
+            ShowSettingsPanel = false;
+
+            // Re-scan with new settings (reuse existing file content)
+            IsBusy = true;
+            try
+            {
+                var redactionResult = await Task.Run(() =>
+                    DetectionService.DetectAndRedactSensitiveData(
+                        FileContent,
+                        ScanEmails, ScanPhones, ScanCreditCards, ScanSSNs,
+                        UseFullRedaction));
+
+                RedactedContent = redactionResult.RedactedContent;
+                DetectedItems = new ObservableCollection<DetectedItem>(
+                    redactionResult.DetectedItems.Select(d => new DetectedItem
+                    {
+                        Original = d.Value,
+                        Masked = UseFullRedaction ? new string('*', d.Value.Length) : MaskingUtils.MaskData(d.Type, d.Value),
+                        Type = d.Type
+                    }));
+
+                OnPropertyChanged(nameof(FilteredDetectedItems));
+                HasDetectedItems = DetectedItems.Any();
+
+                if (!HasDetectedItems)
+                    await _dialogService.ShowMessage("Scan Complete", "No sensitive data detected.");
+            }
+            catch (Exception ex)
+            {
+                await _dialogService.ShowMessage("Error", $"Could not process file: {ex.Message}", "OK");
+            }
+            finally
+            {
+                IsBusy = false;
             }
         }
     }
