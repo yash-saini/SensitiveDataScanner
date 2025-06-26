@@ -13,6 +13,8 @@
     <ContentPage.Resources>
         <ResourceDictionary>
             <valueConverter:MaskingConverter x:Key="MaskingConverter" />
+            <valueConverter:BoolToColorConverter x:Key="BoolToColorConverter" />
+            <valueConverter:InvertBoolConverter x:Key="InvertBoolConverter" />
         </ResourceDictionary>
     </ContentPage.Resources>
 
@@ -27,53 +29,221 @@
         </Grid>
     </shell:Shell.TitleView>
 
-    <!-- Main layout grid: upper content + lower button -->
+     <!--Main layout grid: upper content + lower button--> 
     <Grid RowDefinitions="Auto, *, Auto">
-        <!-- Header and filter content (fixed) -->
-        <VerticalStackLayout Grid.Row="0" Padding="20" Spacing="20">
-            <Button Text="Pick File to Scan"
+         <!--Header section with action buttons--> 
+        <Grid Grid.Row="0" Padding="20,20,20,0" 
+              ColumnDefinitions="*, Auto" 
+              RowDefinitions="Auto,Auto,Auto">
+
+             <!--Top row with main buttons--> 
+            <Button Grid.Row="0" Grid.Column="0"
+                    Text="Pick File to Scan"
                     Command="{Binding PickAndScanFileCommand}"
                     BackgroundColor="#007acc"
                     TextColor="White"
                     CornerRadius="6"
+                    Margin="60,0,0,0"
                     HeightRequest="45"
                     HorizontalOptions="Center"/>
 
-            <HorizontalStackLayout>
+            <Button Grid.Row="0" Grid.Column="1"
+                    Text="Display Options"
+                    Command="{Binding ToggleSettingsCommand}"
+                    BackgroundColor="{Binding ShowSettingsPanel, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#5A6268,#28a745'}"
+                    TextColor="White"
+                    CornerRadius="6"
+                    HeightRequest="45"
+                    WidthRequest="140"
+                    Margin="0,0,0,0"/>
+
+             <!--File name row--> 
+            <HorizontalStackLayout Grid.Row="1" Grid.ColumnSpan="2"
+                                   Margin="0,15,0,0">
                 <Label Text="File Name:" FontAttributes="Bold" />
-                <Label Text="{Binding FileName}" LineBreakMode="TailTruncation" Margin="10,0,0,0" />
+                <Label Text="{Binding FileName}" 
+                       LineBreakMode="TailTruncation" 
+                       Margin="10,0,0,0" />
             </HorizontalStackLayout>
+        </Grid>
 
-            <Label Text="Detected Sensitive Data:" FontAttributes="Bold" Margin="0,20,0,0" />
+         <!--Display Panel-->
+        <Frame Grid.Row="0" Grid.RowSpan="2"
+                       BorderColor="#cccccc"
+                       CornerRadius="10"
+                       Padding="15"
+                       BackgroundColor="{AppThemeBinding Light=#f9f9f9, Dark=#333333}"
+                       Margin="20,80,20,20"
+                       IsVisible="{Binding ShowSettingsPanel}"
+                       HasShadow="True"
+                       VerticalOptions="FillAndExpand"
+                       ZIndex="10">
 
-            <!-- Filter Bar -->
-            <HorizontalStackLayout Spacing="10" Padding="4,0">
-                <Entry Placeholder="Type to filter..."
+            <ScrollView>
+                <VerticalStackLayout Spacing="15">
+                    <Grid RowDefinitions="Auto,Auto,Auto,Auto,*,Auto">
+                 <!--Settings Header--> 
+                <Label Grid.Row="0" 
+                       Text="Scan Settings" 
+                       FontSize="18" 
+                       FontAttributes="Bold"
+                       HorizontalOptions="Center"
+                       Margin="0,0,0,10"/>
+
+                 <!--Data Types Section--> 
+                <Label Grid.Row="1" 
+                       Text="Data Types to Scan:" 
+                       FontAttributes="Bold"
+                       Margin="0,10,0,5"/>
+
+                <Grid Grid.Row="2" ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto">
+                     <!--Email--> 
+                    <CheckBox Grid.Row="0" Grid.Column="0" 
+                              IsChecked="{Binding ScanEmails}" 
+                              VerticalOptions="Center"/>
+                    <Label Grid.Row="0" Grid.Column="1" 
+                           Text="Email Addresses" 
+                           VerticalOptions="Center">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ScanEmailsToggleCommand}" />
+                        </Label.GestureRecognizers>
+                    </Label>
+
+                     <!--Phone--> 
+                    <CheckBox Grid.Row="1" Grid.Column="0" 
+                              IsChecked="{Binding ScanPhones}" 
+                              VerticalOptions="Center"/>
+                    <Label Grid.Row="1" Grid.Column="1" 
+                           Text="Phone Numbers" 
+                           VerticalOptions="Center">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ScanPhonesToggleCommand}" />
+                        </Label.GestureRecognizers>
+                    </Label>
+
+                     <!--SSN--> 
+                    <CheckBox Grid.Row="2" Grid.Column="0" 
+                              IsChecked="{Binding ScanSSNs}" 
+                              VerticalOptions="Center"/>
+                    <Label Grid.Row="2" Grid.Column="1" 
+                           Text="Social Security Numbers" 
+                           VerticalOptions="Center">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ScanSSNsToggleCommand}" />
+                        </Label.GestureRecognizers>
+                    </Label>
+
+                     <!--Credit Card--> 
+                    <CheckBox Grid.Row="3" Grid.Column="0" 
+                              IsChecked="{Binding ScanCreditCards}" 
+                              VerticalOptions="Center"/>
+                    <Label Grid.Row="3" Grid.Column="1" 
+                           Text="Credit Card Numbers" 
+                           VerticalOptions="Center">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ScanCreditCardsToggleCommand}" />
+                        </Label.GestureRecognizers>
+                    </Label>
+                </Grid>
+
+                 <!--Divider--> 
+                <BoxView Grid.Row="3" 
+                         HeightRequest="1" 
+                         Color="#cccccc" 
+                         Margin="0,15"/>
+
+                 <!--Redaction Mode Section--> 
+                <VerticalStackLayout Grid.Row="4" Spacing="10">
+                    <Label Text="Redaction Style:" 
+                           FontAttributes="Bold"/>
+
+                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto">
+                        <RadioButton Grid.Row="0" Grid.Column="0"
+                                     IsChecked="{Binding UsePartialMasking}"
+                                     GroupName="RedactionStyle"/>
+                        <Label Grid.Row="0" Grid.Column="1"
+                               Text="Partial Masking (e.g., show last 4 digits)" 
+                               VerticalOptions="Center">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SetPartialMaskingCommand}" />
+                            </Label.GestureRecognizers>
+                        </Label>
+
+                        <RadioButton Grid.Row="1" Grid.Column="0"
+                                     IsChecked="{Binding UseFullRedaction}"
+                                     GroupName="RedactionStyle"/>
+                        <Label Grid.Row="1" Grid.Column="1"
+                               Text="Full Redaction (completely mask all data)" 
+                               VerticalOptions="Center">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SetFullRedactionCommand}" />
+                            </Label.GestureRecognizers>
+                        </Label>
+                    </Grid>
+                </VerticalStackLayout>
+
+                 <!--Action Buttons--> 
+                <HorizontalStackLayout Grid.Row="5" 
+                                       HorizontalOptions="Center" 
+                                       Spacing="15" 
+                                       Margin="0,20,0,0">
+                    <Button Text="Cancel"
+                            Command="{Binding ToggleSettingsCommand}"
+                            BackgroundColor="#6c757d"
+                            TextColor="White"
+                            CornerRadius="6"
+                            HeightRequest="40"
+                            WidthRequest="100"/>
+
+                    <Button Text="Apply Settings"
+                            Command="{Binding ApplySettingsCommand}"
+                            BackgroundColor="#28a745"
+                            TextColor="White"
+                            CornerRadius="6"
+                            HeightRequest="40"
+                            WidthRequest="150"/>
+                </HorizontalStackLayout>
+                        
+            </Grid>
+                </VerticalStackLayout>
+            </ScrollView>
+        </Frame>
+                
+
+         <!--Main Content Area-->
+        <ScrollView Grid.Row="1"
+            IsVisible="{Binding ShowSettingsPanel, Converter={StaticResource InvertBoolConverter}}">
+            <VerticalStackLayout Padding="20,0,20,0" Spacing="15">
+
+                <Label Text="Detected Sensitive Data:" FontAttributes="Bold" Margin="0,10,0,0" />
+
+                <!--Filter Bar-->
+                <HorizontalStackLayout Spacing="10" Padding="4,0">
+                    <Entry Placeholder="Type to filter..."
                        Text="{Binding FilterText, Mode=TwoWay}"
                        WidthRequest="250"
                        BackgroundColor="#f0f0f0"
                        FontAttributes="Italic"
                        HeightRequest="35"
                        Margin="0,5" />
-            </HorizontalStackLayout>
+                </HorizontalStackLayout>
 
-            <!-- Column Headers with fixed widths to match data columns -->
-            <Grid ColumnDefinitions="100, 2*, 1.5*" ColumnSpacing="20" Padding="4,0" Margin="0,0,0,4">
-                <Label Text="Type" FontAttributes="Bold" Grid.Column="0" />
-                <Label Text="Original" FontAttributes="Bold" Grid.Column="1" />
-                <Label Text="Masked" FontAttributes="Bold" Grid.Column="2" />
-            </Grid>
-        </VerticalStackLayout>
+                <!--Column Headers with fixed widths to match data columns-->
+                <Grid ColumnDefinitions="100, 2*, 1.5*" ColumnSpacing="20" Padding="4,0" Margin="0,0,0,4">
+                    <Label Text="Type" FontAttributes="Bold" Grid.Column="0" />
+                    <Label Text="Original" FontAttributes="Bold" Grid.Column="1" />
+                    <Label Text="Masked" FontAttributes="Bold" Grid.Column="2" />
+                </Grid>
 
-        <!-- Scrollable CollectionView only -->
-        <ScrollView Grid.Row="1">
-            <!-- CollectionView -->
-            <CollectionView ItemsSource="{Binding FilteredDetectedItems}">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="models:DetectedItem">
-                        <Grid ColumnDefinitions="100, 2*, 1.5*" ColumnSpacing="20" Padding="4">
-                            <!-- Type Label with background -->
-                            <Frame BackgroundColor="LightGray"
+                <!--CollectionView-->
+                <CollectionView ItemsSource="{Binding FilteredDetectedItems}"
+                           HeightRequest="400"
+                           VerticalOptions="FillAndExpand">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:DetectedItem">
+                            <Grid ColumnDefinitions="100, 2*, 1.5*" ColumnSpacing="20" Padding="4">
+                                <!--Type Label with background-->
+                                <Frame BackgroundColor="LightGray"
                                    Padding="8,4"
                                    Margin="0,2"
                                    CornerRadius="4"
@@ -82,25 +252,33 @@
                                    HorizontalOptions="Start"
                                    WidthRequest="90"
                                    VerticalOptions="Center">
-                                <Label Text="{Binding Type}" 
+                                    <Label Text="{Binding Type}" 
                                        FontSize="12" 
                                        HorizontalOptions="Center" />
-                            </Frame>
-                            <Label Text="{Binding Original}" 
+                                </Frame>
+                                <Label Text="{Binding Original}" 
                                    Grid.Column="1" 
                                    LineBreakMode="TailTruncation"
                                    VerticalOptions="Center"/>
-                            <Label Text="{Binding Masked}" 
+                                <Label Text="{Binding Masked}" 
                                    Grid.Column="2" 
                                    TextColor="Gray"
                                    VerticalOptions="Center"/>
-                        </Grid>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                    <CollectionView.EmptyView>
+                        <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center">
+                            <Label Text="No sensitive data found" 
+                               TextColor="Gray" 
+                               FontSize="16"/>
+                        </VerticalStackLayout>
+                    </CollectionView.EmptyView>
+                </CollectionView>
+            </VerticalStackLayout>
         </ScrollView>
 
-        <!-- Fixed Bottom Button -->
+        <!--Fixed Bottom Button--> 
         <VerticalStackLayout Grid.Row="2"
                              Padding="20"
                              BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Black}}">
@@ -114,7 +292,7 @@
                     HorizontalOptions="Center"/>
         </VerticalStackLayout>
 
-        <!-- Busy indicator overlay -->
+         <!--Busy indicator overlay--> 
         <Grid IsVisible="{Binding IsBusy}"
               BackgroundColor="#80000000"
               InputTransparent="False"

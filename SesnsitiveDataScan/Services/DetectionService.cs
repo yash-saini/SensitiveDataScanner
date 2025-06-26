@@ -30,19 +30,33 @@ namespace SesnsitiveDataScan.Services
         /// <summary>
         /// Detects sensitive data and also redacts the content by masking the values.
         /// </summary>
-        public static RedactionResult DetectAndRedactSensitiveData(string content)
+        public static RedactionResult DetectAndRedactSensitiveData( string content,
+                                                                    bool scanEmail,
+                                                                    bool scanPhone,
+                                                                    bool scanCC,
+                                                                    bool scanSSN,
+                                                                    bool fullRedact)
         {
-            var sensitiveDataPatterns = GetPatterns();
+            var allPatterns = GetPatterns();
+            var enabledPatterns = allPatterns.Where(p =>
+                (scanEmail && p.Type == "Email") ||
+                (scanPhone && p.Type == "Phone") ||
+                (scanCC && p.Type == "Credit Card") ||
+                (scanSSN && p.Type == "SSN")
+            ).ToList();
 
             var detectedData = new List<(string Type, string Value)>();
             string redactedContent = content;
 
-            foreach (var (type, pattern) in sensitiveDataPatterns)
+            foreach (var (type, pattern) in enabledPatterns)
             {
                 redactedContent = Regex.Replace(redactedContent, pattern, match =>
                 {
                     var value = match.Value;
                     detectedData.Add((type, value));
+
+                    if (fullRedact)
+                        return new string('*', value.Length);
 
                     return type switch
                     {
