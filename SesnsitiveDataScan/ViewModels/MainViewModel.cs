@@ -30,6 +30,9 @@ namespace SesnsitiveDataScan.ViewModels
         [ObservableProperty]
         private bool usePartialMasking = true;
 
+        [ObservableProperty]
+        private bool isDarkMode = Application.Current.RequestedTheme == AppTheme.Dark;
+
         // Redaction mode
         [ObservableProperty] bool useFullRedaction;
 
@@ -71,12 +74,18 @@ namespace SesnsitiveDataScan.ViewModels
             OnPropertyChanged(nameof(FilteredDetectedItems));
         }
 
+        partial void OnIsDarkModeChanged(bool value)
+        {
+            Application.Current.UserAppTheme = value ? AppTheme.Dark : AppTheme.Light;
+        }
+
         public ICommand ScanEmailsToggleCommand { get; }
         public ICommand ScanPhonesToggleCommand { get; }
         public ICommand ScanSSNsToggleCommand { get; }
         public ICommand ScanCreditCardsToggleCommand { get; }
         public ICommand SetPartialMaskingCommand { get; }
         public ICommand SetFullRedactionCommand { get; }
+        public ICommand ToggleThemeCommand { get; }
 
         public MainViewModel(IUserDialogService dialogService)
         {
@@ -88,6 +97,11 @@ namespace SesnsitiveDataScan.ViewModels
             ScanCreditCardsToggleCommand = new Command(ToggleScanCreditCards);
             SetPartialMaskingCommand = new Command(SetPartialMasking);
             SetFullRedactionCommand = new Command(SetFullRedaction);
+            ToggleThemeCommand = new Command(ToggleTheme);
+        }
+        private void ToggleTheme()
+        {
+            IsDarkMode = !IsDarkMode;
         }
 
         private void ToggleScanEmails()
