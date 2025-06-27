@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="SesnsitiveDataScan.MainPage"
              xmlns:vm="clr-namespace:SesnsitiveDataScan.ViewModels"
-             xmlns:valueConverter ="clr-namespace:SesnsitiveDataScan.ValueConverter"
+             xmlns:valueConverter="clr-namespace:SesnsitiveDataScan.ValueConverter"
              xmlns:models="clr-namespace:SesnsitiveDataScan.Models"
              x:DataType="vm:MainViewModel"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
@@ -23,29 +23,21 @@
         <Grid>
             <Label Text="Sensitive Data Scanner"
                    FontAttributes="Bold"
-                   FontSize="28"
+                   FontSize="25"
                    Margin="0,10,0,0"
                    HorizontalOptions="Center"
                    VerticalOptions="Center" />
         </Grid>
     </shell:Shell.TitleView>
 
-     <!--Main layout grid: upper content + lower button--> 
     <Grid RowDefinitions="Auto, *, Auto">
-         <!--Header section with action buttons--> 
-        <Grid Grid.Row="0" Padding="20,20,20,0" 
-              ColumnDefinitions="*, Auto" 
-              RowDefinitions="Auto,Auto,Auto">
-
-             <!--Top row with main buttons--> 
+        <!-- Header -->
+        <Grid Grid.Row="0" Padding="20,20,20,0" ColumnDefinitions="*, Auto" RowDefinitions="Auto,Auto,Auto">
             <Button Grid.Row="0" Grid.Column="0"
                     Text="Pick File to Scan"
                     Command="{Binding PickAndScanFileCommand}"
-                    BackgroundColor="#007acc"
-                    TextColor="White"
-                    CornerRadius="6"
-                    Margin="60,0,0,0"
-                    HeightRequest="45"
+                    Style="{StaticResource Styles.PrimaryButton}"
+                    Margin="110,0,0,0"
                     HorizontalOptions="Center"/>
 
             <Button Grid.Row="0" Grid.Column="1"
@@ -58,172 +50,104 @@
                     WidthRequest="140"
                     Margin="0,0,0,0"/>
 
-             <!--File name row--> 
-            <HorizontalStackLayout Grid.Row="1" Grid.ColumnSpan="2"
-                                   Margin="0,15,0,0">
+            <!-- File Info -->
+            <HorizontalStackLayout Grid.Row="1" Grid.ColumnSpan="2" Margin="0,15,0,0">
                 <Label Text="File Name:" FontAttributes="Bold" />
-                <Label Text="{Binding FileName}" 
-                       LineBreakMode="TailTruncation" 
-                       Margin="10,0,0,0" />
+                <Label Text="{Binding FileName}" Margin="10,0,0,0" LineBreakMode="TailTruncation" />
             </HorizontalStackLayout>
 
-            <HorizontalStackLayout Grid.Row="2"
-                           Grid.ColumnSpan="2"
-                           Spacing="10"
-                           HorizontalOptions="End"
-                           Margin="0,10,0,0">
-                <!-- Light mode label and icon -->
-                <Label Text="Light" 
-                           VerticalOptions="Center"
-                           FontSize="12"
-                           Opacity="{Binding IsDarkMode, Converter={StaticResource InvertBoolConverter}}" />
+            <!-- Theme Toggle -->
+            <HorizontalStackLayout Grid.Row="2" Grid.ColumnSpan="2" Spacing="10" HorizontalOptions="End" Margin="0,10,0,0">
+                <Label Text="Light" VerticalOptions="Center" FontSize="12"
+                       Opacity="{Binding IsDarkMode, Converter={StaticResource InvertBoolConverter}}" />
 
                 <Grid WidthRequest="50" HeightRequest="30">
                     <Image Source="sun.png"
-                           WidthRequest="24"
-                           HeightRequest="24"
-                           HorizontalOptions="Center"
-                           VerticalOptions="Center"
+                           WidthRequest="24" HeightRequest="24"
                            Style="{StaticResource Styles.ClickableImage}"
-                           Opacity="{Binding IsDarkMode, Converter={StaticResource InvertBoolConverter}}">
+                           Opacity="{Binding IsDarkMode, Converter={StaticResource InvertBoolConverter}}"
+                           HorizontalOptions="Center" VerticalOptions="Center">
                         <Image.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding ToggleThemeCommand}" Tapped="OnImageTapped" />
+                            <TapGestureRecognizer Command="{Binding ToggleThemeCommand}" />
                         </Image.GestureRecognizers>
                     </Image>
-
                     <Image Source="moon.png"
-                           WidthRequest="24"
-                           HeightRequest="24"
-                           HorizontalOptions="Center" 
-                           VerticalOptions="Center"
+                           WidthRequest="24" HeightRequest="24"
                            Style="{StaticResource Styles.ClickableImage}"
-                           Opacity="{Binding IsDarkMode}">
+                           Opacity="{Binding IsDarkMode}"
+                           HorizontalOptions="Center" VerticalOptions="Center">
                         <Image.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding ToggleThemeCommand}" Tapped="OnImageTapped" />
+                            <TapGestureRecognizer Command="{Binding ToggleThemeCommand}" />
                         </Image.GestureRecognizers>
                     </Image>
                 </Grid>
 
-                <!-- Dark mode label -->
-                <Label Text="Dark" 
-                           VerticalOptions="Center"
-                           FontSize="12"
-                           Opacity="{Binding IsDarkMode}" />
+                <Label Text="Dark" VerticalOptions="Center" FontSize="12" Opacity="{Binding IsDarkMode}" />
             </HorizontalStackLayout>
         </Grid>
 
-         <!--Display Panel-->
+        <!-- Settings Panel -->
         <Frame Grid.Row="0" Grid.RowSpan="2"
-                       BorderColor="#cccccc"
-                       CornerRadius="10"
-                       Padding="15"
-                       BackgroundColor="{AppThemeBinding Light=#f9f9f9, Dark=#333333}"
-                       Margin="20,80,20,20"
-                       IsVisible="{Binding ShowSettingsPanel}"
-                       HasShadow="True"
-                       VerticalOptions="Fill"
-                       ZIndex="10">
+               BorderColor="{StaticResource BorderColor}"
+               CornerRadius="10"
+               Padding="15"
+               BackgroundColor="{AppThemeBinding Light={StaticResource LightBackground}, Dark={StaticResource DarkBackground}}"
+               Margin="20,80,20,20"
+               IsVisible="{Binding ShowSettingsPanel}"
+               HasShadow="True"
+               VerticalOptions="Fill"
+               ZIndex="10">
 
             <ScrollView>
                 <VerticalStackLayout Spacing="15">
                     <Grid RowDefinitions="Auto,Auto,Auto,Auto,*,Auto">
-                        <!--Settings Header-->
-                        <Label Grid.Row="0" 
-                       Text="Scan Settings" 
-                       FontSize="18" 
-                       FontAttributes="Bold"
-                       HorizontalOptions="Center"
-                       Margin="0,0,0,10"/>
-
-                        <!--Data Types Section-->
-                        <Label Grid.Row="1" 
-                       Text="Data Types to Scan:" 
-                       FontAttributes="Bold"
-                       Margin="0,10,0,5"/>
+                        <Label Grid.Row="0" Text="Scan Settings" Style="{StaticResource Styles.SectionHeader}" HorizontalOptions="Center" Margin="0,0,0,10" />
+                        <Label Grid.Row="1" Text="Data Types to Scan:" FontAttributes="Bold" Margin="0,10,0,5"/>
 
                         <Grid Grid.Row="2" ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto">
-                            <!--Email-->
-                            <CheckBox Grid.Row="0" Grid.Column="0" 
-                              IsChecked="{Binding ScanEmails}" 
-                              VerticalOptions="Center"/>
-                            <Label Grid.Row="0" Grid.Column="1" 
-                           Text="Email Addresses" 
-                           Style="{StaticResource Styles.ClickableLabel}"
-                           VerticalOptions="Center">
+                            <CheckBox Grid.Row="0" Grid.Column="0" IsChecked="{Binding ScanEmails}" VerticalOptions="Center"/>
+                            <Label Grid.Row="0" Grid.Column="1" Text="Email Addresses" Style="{StaticResource Styles.ClickableLabel}">
                                 <Label.GestureRecognizers>
                                     <TapGestureRecognizer Command="{Binding ScanEmailsToggleCommand}" />
                                 </Label.GestureRecognizers>
                             </Label>
 
-                            <!--Phone-->
-                            <CheckBox Grid.Row="1" Grid.Column="0" 
-                                   IsChecked="{Binding ScanPhones}" 
-                                   VerticalOptions="Center"/>
-                            <Label Grid.Row="1" Grid.Column="1" 
-                           Text="Phone Numbers" 
-                           Style="{StaticResource Styles.ClickableLabel}"
-                           VerticalOptions="Center">
+                            <CheckBox Grid.Row="1" Grid.Column="0" IsChecked="{Binding ScanPhones}" VerticalOptions="Center"/>
+                            <Label Grid.Row="1" Grid.Column="1" Text="Phone Numbers" Style="{StaticResource Styles.ClickableLabel}">
                                 <Label.GestureRecognizers>
                                     <TapGestureRecognizer Command="{Binding ScanPhonesToggleCommand}" />
                                 </Label.GestureRecognizers>
                             </Label>
 
-                            <!--SSN-->
-                            <CheckBox Grid.Row="2" Grid.Column="0" 
-                                   IsChecked="{Binding ScanSSNs}" 
-                                   VerticalOptions="Center"/>
-                            <Label Grid.Row="2" Grid.Column="1" 
-                                    Text="Social Security Numbers" 
-                                    Style="{StaticResource Styles.ClickableLabel}"
-                                    VerticalOptions="Center">
+                            <CheckBox Grid.Row="2" Grid.Column="0" IsChecked="{Binding ScanSSNs}" VerticalOptions="Center"/>
+                            <Label Grid.Row="2" Grid.Column="1" Text="Social Security Numbers" Style="{StaticResource Styles.ClickableLabel}">
                                 <Label.GestureRecognizers>
                                     <TapGestureRecognizer Command="{Binding ScanSSNsToggleCommand}" />
                                 </Label.GestureRecognizers>
                             </Label>
 
-                            <!--Credit Card-->
-                            <CheckBox Grid.Row="3" Grid.Column="0" 
-                                    IsChecked="{Binding ScanCreditCards}" 
-                                    VerticalOptions="Center"/>
-                            <Label Grid.Row="3" Grid.Column="1" 
-                                    Text="Credit Card Numbers" 
-                                    Style="{StaticResource Styles.ClickableLabel}"
-                                    VerticalOptions="Center">
+                            <CheckBox Grid.Row="3" Grid.Column="0" IsChecked="{Binding ScanCreditCards}" VerticalOptions="Center"/>
+                            <Label Grid.Row="3" Grid.Column="1" Text="Credit Card Numbers" Style="{StaticResource Styles.ClickableLabel}">
                                 <Label.GestureRecognizers>
                                     <TapGestureRecognizer Command="{Binding ScanCreditCardsToggleCommand}" />
                                 </Label.GestureRecognizers>
                             </Label>
                         </Grid>
 
-                        <!--Divider-->
-                        <BoxView Grid.Row="3" 
-                                     HeightRequest="1" 
-                                     Color="#cccccc" 
-                                     Margin="0,15"/>
+                        <BoxView Grid.Row="3" HeightRequest="1" Color="{StaticResource BorderColor}" Margin="0,15"/>
 
-                        <!--Redaction Mode Section-->
                         <VerticalStackLayout Grid.Row="4" Spacing="10">
-                            <Label Text="Redaction Style:" 
-                           FontAttributes="Bold"/>
-
+                            <Label Text="Redaction Style:" FontAttributes="Bold"/>
                             <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto">
-                                <RadioButton Grid.Row="0" Grid.Column="0"
-                                     IsChecked="{Binding UsePartialMasking}"
-                                     GroupName="RedactionStyle"/>
-                                <Label Grid.Row="0" Grid.Column="1"
-                                       Text="Partial Masking (e.g., show last 4 digits)" 
-                                       VerticalOptions="Center">
+                                <RadioButton Grid.Row="0" Grid.Column="0" IsChecked="{Binding UsePartialMasking}" GroupName="RedactionStyle"/>
+                                <Label Grid.Row="0" Grid.Column="1" Text="Partial Masking (e.g., show last 4 digits)" VerticalOptions="Center">
                                     <Label.GestureRecognizers>
                                         <TapGestureRecognizer Command="{Binding SetPartialMaskingCommand}" />
                                     </Label.GestureRecognizers>
                                 </Label>
 
-                                <RadioButton Grid.Row="1" Grid.Column="0"
-                                     IsChecked="{Binding UseFullRedaction}"
-                                     GroupName="RedactionStyle"/>
-                                <Label Grid.Row="1" Grid.Column="1"
-                                       Text="Full Redaction (completely mask all data)" 
-                                       VerticalOptions="Center">
+                                <RadioButton Grid.Row="1" Grid.Column="0" IsChecked="{Binding UseFullRedaction}" GroupName="RedactionStyle"/>
+                                <Label Grid.Row="1" Grid.Column="1" Text="Full Redaction (completely mask all data)" VerticalOptions="Center">
                                     <Label.GestureRecognizers>
                                         <TapGestureRecognizer Command="{Binding SetFullRedactionCommand}" />
                                     </Label.GestureRecognizers>
@@ -231,137 +155,73 @@
                             </Grid>
                         </VerticalStackLayout>
 
-                        <!--Action Buttons-->
-                        <HorizontalStackLayout Grid.Row="5" 
-                                       HorizontalOptions="Center" 
-                                       Spacing="15" 
-                                       Margin="0,20,0,0">
-                            <Button Text="Cancel"
-                                        Command="{Binding ToggleSettingsCommand}"
-                                        BackgroundColor="#6c757d"
-                                        TextColor="White"
-                                        CornerRadius="6"
-                                        HeightRequest="40"
-                                        WidthRequest="100"/>
-
-                            <Button Text="Apply Settings"
-                                        Command="{Binding ApplySettingsCommand}"
-                                        BackgroundColor="#28a745"
-                                        TextColor="White"
-                                        CornerRadius="6"
-                                        HeightRequest="40"
-                                        WidthRequest="150"/>
+                        <HorizontalStackLayout Grid.Row="5" HorizontalOptions="Center" Spacing="15" Margin="0,20,0,0">
+                            <Button Text="Cancel" Command="{Binding ToggleSettingsCommand}" Style="{StaticResource Styles.SecondaryButton}" WidthRequest="100"/>
+                            <Button Text="Apply Settings" Command="{Binding ApplySettingsCommand}" Style="{StaticResource Styles.AccentButton}" WidthRequest="150"/>
                         </HorizontalStackLayout>
-
                     </Grid>
                 </VerticalStackLayout>
             </ScrollView>
         </Frame>
 
-        <!--Main Content Area-->
-        <ScrollView Grid.Row="1"
-            IsVisible="{Binding ShowSettingsPanel, Converter={StaticResource InvertBoolConverter}}">
+        <!-- Main Content -->
+        <ScrollView Grid.Row="1" IsVisible="{Binding ShowSettingsPanel, Converter={StaticResource InvertBoolConverter}}">
             <VerticalStackLayout Padding="20,0,20,0" Spacing="15">
-
                 <Label Text="Detected Sensitive Data:" FontAttributes="Bold" Margin="0,10,0,0" />
 
-                <!--Filter Bar-->
+                <!-- Filter -->
                 <HorizontalStackLayout Spacing="10" Padding="4,0">
                     <Entry Placeholder="Type to filter..."
-                       Text="{Binding FilterText, Mode=TwoWay}"
-                       WidthRequest="250"
-                       BackgroundColor="#f0f0f0"
-                       FontAttributes="Italic"
-                       HeightRequest="35"
-                       Margin="0,5" />
+                           Text="{Binding FilterText, Mode=TwoWay}"
+                           Style="{StaticResource Styles.FilterEntry}"
+                           WidthRequest="250"/>
                 </HorizontalStackLayout>
 
+                <!-- Headers -->
                 <Grid ColumnDefinitions="100, 2*, 1.5*" ColumnSpacing="20" Padding="4,0" Margin="0,0,0,4">
                     <Label Text="Type" FontAttributes="Bold" Grid.Column="0" />
                     <Label Text="Original" FontAttributes="Bold" Grid.Column="1" />
                     <Label Text="Masked" FontAttributes="Bold" Grid.Column="2" />
                 </Grid>
 
-                <!--CollectionView-->
-                <CollectionView ItemsSource="{Binding FilteredDetectedItems}"
-                           HeightRequest="400"
-                           VerticalOptions="Fill">
+                <!-- Data -->
+                <CollectionView ItemsSource="{Binding FilteredDetectedItems}" HeightRequest="400" VerticalOptions="Fill">
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="models:DetectedItem">
                             <Grid ColumnDefinitions="100, 2*, 1.5*" ColumnSpacing="20" Padding="4">
-                                <!--Type Label with background-->
-                                <Frame BackgroundColor="LightGray"
-                                   Padding="8,4"
-                                   Margin="0,2"
-                                   CornerRadius="4"
-                                   HasShadow="False"
-                                   Grid.Column="0"
-                                   HorizontalOptions="Start"
-                                   WidthRequest="90"
-                                   VerticalOptions="Center">
-                                    <Label Text="{Binding Type}" 
-                                       FontSize="12" 
-                                       HorizontalOptions="Center" />
+                                <Frame Style="{StaticResource Styles.DataTypeFrame}" Grid.Column="0">
+                                    <Label Text="{Binding Type}" FontSize="12" HorizontalOptions="Center"/>
                                 </Frame>
-                                <Label Text="{Binding Original}" 
-                                   Grid.Column="1" 
-                                   LineBreakMode="TailTruncation"
-                                   VerticalOptions="Center"/>
-                                <Label Text="{Binding Masked}" 
-                                   Grid.Column="2" 
-                                   TextColor="Gray"
-                                   VerticalOptions="Center"/>
+                                <Label Text="{Binding Original}" Grid.Column="1" LineBreakMode="TailTruncation" VerticalOptions="Center"/>
+                                <Label Text="{Binding Masked}" Grid.Column="2" TextColor="Gray" VerticalOptions="Center"/>
                             </Grid>
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
                     <CollectionView.EmptyView>
                         <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center">
-                            <Label Text="No sensitive data found" 
-                               TextColor="Gray" 
-                               FontSize="16"/>
+                            <Label Text="No sensitive data found" TextColor="Gray" FontSize="16"/>
                         </VerticalStackLayout>
                     </CollectionView.EmptyView>
                 </CollectionView>
             </VerticalStackLayout>
         </ScrollView>
 
-        <!--Fixed Bottom Button--> 
-        <VerticalStackLayout Grid.Row="2"
-                             Padding="20"
-                             BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Black}}">
+        <!-- Bottom Export Button -->
+        <VerticalStackLayout Grid.Row="2" Padding="20" BackgroundColor="{AppThemeBinding Light=White, Dark=Black}">
             <Button Text="Export Detected + Masked Results"
                     Command="{Binding ExportResultsCommand}"
-                    IsVisible="{Binding HasDetectedItems}"
-                    BackgroundColor="#007acc"
-                    TextColor="White"
-                    CornerRadius="6"
-                    HeightRequest="45"
-                    HorizontalOptions="Center"/>
+                    Style="{StaticResource Styles.PrimaryButton}"
+                    IsVisible="{Binding HasDetectedItems}" />
         </VerticalStackLayout>
 
-         <!--Busy indicator overlay--> 
-        <Grid IsVisible="{Binding IsBusy}"
-              BackgroundColor="#80000000"
-              InputTransparent="False"
-              Grid.RowSpan="3"
-              ZIndex="99">
-            <VerticalStackLayout HorizontalOptions="Center" 
-                                VerticalOptions="Center" 
-                                Spacing="15">
-                <Frame CornerRadius="10" 
-                       BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark=#333333}"
-                       HasShadow="True"
-                       Padding="30">
+        <!-- Busy Overlay -->
+        <Grid IsVisible="{Binding IsBusy}" BackgroundColor="#80000000" InputTransparent="False" Grid.RowSpan="3" ZIndex="99">
+            <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="15">
+                <Frame CornerRadius="10" BackgroundColor="{AppThemeBinding Light=White, Dark=#333333}" HasShadow="True" Padding="30">
                     <VerticalStackLayout Spacing="15">
-                        <ActivityIndicator IsRunning="True"
-                                          Color="#007acc"
-                                          WidthRequest="50"
-                                          HeightRequest="50"
-                                          HorizontalOptions="Center"/>
-                        <Label Text="Please wait..."
-                              FontAttributes="Bold"
-                              HorizontalOptions="Center"
-                              TextColor="{AppThemeBinding Light=#333333, Dark={StaticResource White}}"/>
+                        <ActivityIndicator IsRunning="True" Color="#007acc" WidthRequest="50" HeightRequest="50" HorizontalOptions="Center"/>
+                        <Label Text="Please wait..." FontAttributes="Bold" HorizontalOptions="Center"
+                               TextColor="{AppThemeBinding Light=#333333, Dark=White}"/>
                     </VerticalStackLayout>
                 </Frame>
             </VerticalStackLayout>
