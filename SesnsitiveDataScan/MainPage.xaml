@@ -37,7 +37,7 @@
                     Text="Pick File to Scan"
                     Command="{Binding PickAndScanFileCommand}"
                     Style="{StaticResource Styles.PrimaryButton}"
-                    Margin="50,0,0,0"
+                    Margin="240,0,0,0"
                     HorizontalOptions="Center"/>
 
             <Button Grid.Row="0" Grid.Column="1"
