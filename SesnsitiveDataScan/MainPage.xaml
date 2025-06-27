@@ -84,9 +84,10 @@
                            HeightRequest="24"
                            HorizontalOptions="Center"
                            VerticalOptions="Center"
+                           Style="{StaticResource Styles.ClickableImage}"
                            Opacity="{Binding IsDarkMode, Converter={StaticResource InvertBoolConverter}}">
                         <Image.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding ToggleThemeCommand}" />
+                            <TapGestureRecognizer Command="{Binding ToggleThemeCommand}" Tapped="OnImageTapped" />
                         </Image.GestureRecognizers>
                     </Image>
 
@@ -95,9 +96,10 @@
                            HeightRequest="24"
                            HorizontalOptions="Center" 
                            VerticalOptions="Center"
+                           Style="{StaticResource Styles.ClickableImage}"
                            Opacity="{Binding IsDarkMode}">
                         <Image.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding ToggleThemeCommand}" />
+                            <TapGestureRecognizer Command="{Binding ToggleThemeCommand}" Tapped="OnImageTapped" />
                         </Image.GestureRecognizers>
                     </Image>
                 </Grid>
@@ -146,6 +148,7 @@
                               VerticalOptions="Center"/>
                             <Label Grid.Row="0" Grid.Column="1" 
                            Text="Email Addresses" 
+                           Style="{StaticResource Styles.ClickableLabel}"
                            VerticalOptions="Center">
                                 <Label.GestureRecognizers>
                                     <TapGestureRecognizer Command="{Binding ScanEmailsToggleCommand}" />
@@ -158,6 +161,7 @@
                                    VerticalOptions="Center"/>
                             <Label Grid.Row="1" Grid.Column="1" 
                            Text="Phone Numbers" 
+                           Style="{StaticResource Styles.ClickableLabel}"
                            VerticalOptions="Center">
                                 <Label.GestureRecognizers>
                                     <TapGestureRecognizer Command="{Binding ScanPhonesToggleCommand}" />
@@ -170,6 +174,7 @@
                                    VerticalOptions="Center"/>
                             <Label Grid.Row="2" Grid.Column="1" 
                                     Text="Social Security Numbers" 
+                                    Style="{StaticResource Styles.ClickableLabel}"
                                     VerticalOptions="Center">
                                 <Label.GestureRecognizers>
                                     <TapGestureRecognizer Command="{Binding ScanSSNsToggleCommand}" />
@@ -182,6 +187,7 @@
                                     VerticalOptions="Center"/>
                             <Label Grid.Row="3" Grid.Column="1" 
                                     Text="Credit Card Numbers" 
+                                    Style="{StaticResource Styles.ClickableLabel}"
                                     VerticalOptions="Center">
                                 <Label.GestureRecognizers>
                                     <TapGestureRecognizer Command="{Binding ScanCreditCardsToggleCommand}" />
