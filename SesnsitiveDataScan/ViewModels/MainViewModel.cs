@@ -87,9 +87,21 @@ namespace SesnsitiveDataScan.ViewModels
         public ICommand SetFullRedactionCommand { get; }
         public ICommand ToggleThemeCommand { get; }
 
+        [ObservableProperty]
+        private bool showContentOverviewPanel = false;
+
+        [ObservableProperty]
+        private ContentAnalysisResult contentAnalysis;
+
+        [ObservableProperty]
+        private bool isAnalyzingContent = false;
+
+        private readonly ContentAnalysisService _contentAnalysisService;
+
         public MainViewModel(IUserDialogService dialogService)
         {
             _dialogService = dialogService;
+            _contentAnalysisService = new ContentAnalysisService();
             FileContent = "No file loaded";
             ScanEmailsToggleCommand = new Command(ToggleScanEmails);
             ScanPhonesToggleCommand = new Command(ToggleScanPhones);
@@ -99,6 +111,41 @@ namespace SesnsitiveDataScan.ViewModels
             SetFullRedactionCommand = new Command(SetFullRedaction);
             ToggleThemeCommand = new Command(ToggleTheme);
         }
+
+        [RelayCommand]
+        private void ToggleContentOverview()
+        {
+            ShowContentOverviewPanel = !ShowContentOverviewPanel;
+
+            if (ShowContentOverviewPanel)
+            {
+                ShowSettingsPanel = false;
+                if (!string.IsNullOrEmpty(FileContent) && FileContent != "No file loaded")
+                {
+                    AnalyzeContentAsync();
+                }
+            }
+        }
+
+        private async void AnalyzeContentAsync()
+        {
+            if (IsAnalyzingContent) return;
+
+            IsAnalyzingContent = true;
+            try
+            {
+                ContentAnalysis = await _contentAnalysisService.AnalyzeContentAsync(FileContent);
+            }
+            catch (Exception ex)
+            {
+                await _dialogService.ShowMessage("Analysis Error", $"Could not analyze content: {ex.Message}", "OK");
+            }
+            finally
+            {
+                IsAnalyzingContent = false;
+            }
+        }
+
         private void ToggleTheme()
         {
             IsDarkMode = !IsDarkMode;

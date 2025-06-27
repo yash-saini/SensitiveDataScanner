@@ -32,15 +32,25 @@
 
     <Grid RowDefinitions="Auto, *, Auto">
         <!-- Header -->
-        <Grid Grid.Row="0" Padding="20,20,20,0" ColumnDefinitions="*, Auto" RowDefinitions="Auto,Auto,Auto">
+        <Grid Grid.Row="0" Padding="20,20,20,0" ColumnDefinitions="*, Auto, Auto" RowDefinitions="Auto,Auto,Auto">
             <Button Grid.Row="0" Grid.Column="0"
                     Text="Pick File to Scan"
                     Command="{Binding PickAndScanFileCommand}"
                     Style="{StaticResource Styles.PrimaryButton}"
-                    Margin="110,0,0,0"
+                    Margin="50,0,0,0"
                     HorizontalOptions="Center"/>
 
             <Button Grid.Row="0" Grid.Column="1"
+                    Text="AI Analysis"
+                    Command="{Binding ToggleContentOverviewCommand}"
+                    BackgroundColor="{Binding ShowContentOverviewPanel, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#5A6268,#17a2b8'}"
+                    TextColor="White"
+                    CornerRadius="6"
+                    HeightRequest="45"
+                    WidthRequest="120"
+                    Margin="0,0,10,0"/>
+
+            <Button Grid.Row="0" Grid.Column="2"
                     Text="Display Options"
                     Command="{Binding ToggleSettingsCommand}"
                     BackgroundColor="{Binding ShowSettingsPanel, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#5A6268,#28a745'}"
@@ -88,79 +98,108 @@
 
         <!-- Settings Panel -->
         <Frame Grid.Row="0" Grid.RowSpan="2"
-               BorderColor="{StaticResource BorderColor}"
-               CornerRadius="10"
-               Padding="15"
-               BackgroundColor="{AppThemeBinding Light={StaticResource LightBackground}, Dark={StaticResource DarkBackground}}"
-               Margin="20,80,20,20"
-               IsVisible="{Binding ShowSettingsPanel}"
-               HasShadow="True"
-               VerticalOptions="Fill"
-               ZIndex="10">
+       BorderColor="{StaticResource BorderColor}"
+       CornerRadius="10"
+       Padding="15"
+       BackgroundColor="{AppThemeBinding Light={StaticResource LightBackground}, Dark={StaticResource DarkBackground}}"
+       Margin="20,80,20,20"
+       IsVisible="{Binding ShowContentOverviewPanel}"
+       HasShadow="True"
+       VerticalOptions="Fill"
+       ZIndex="10">
 
             <ScrollView>
-                <VerticalStackLayout Spacing="15">
-                    <Grid RowDefinitions="Auto,Auto,Auto,Auto,*,Auto">
-                        <Label Grid.Row="0" Text="Scan Settings" Style="{StaticResource Styles.SectionHeader}" HorizontalOptions="Center" Margin="0,0,0,10" />
-                        <Label Grid.Row="1" Text="Data Types to Scan:" FontAttributes="Bold" Margin="0,10,0,5"/>
+                <Grid RowDefinitions="Auto,Auto,*,Auto" RowSpacing="15">
+                    <Label Grid.Row="0" Text="ML.NET Content Analysis" 
+                   Style="{StaticResource Styles.SectionHeader}" 
+                   HorizontalOptions="Center" />
 
-                        <Grid Grid.Row="2" ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto">
-                            <CheckBox Grid.Row="0" Grid.Column="0" IsChecked="{Binding ScanEmails}" VerticalOptions="Center"/>
-                            <Label Grid.Row="0" Grid.Column="1" Text="Email Addresses" Style="{StaticResource Styles.ClickableLabel}">
-                                <Label.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding ScanEmailsToggleCommand}" />
-                                </Label.GestureRecognizers>
-                            </Label>
+                    <ActivityIndicator Grid.Row="1" 
+                              IsRunning="{Binding IsAnalyzingContent}" 
+                              IsVisible="{Binding IsAnalyzingContent}"
+                              HorizontalOptions="Center"
+                              VerticalOptions="Center"
+                              Color="#007acc"
+                              HeightRequest="50"
+                              WidthRequest="50"/>
 
-                            <CheckBox Grid.Row="1" Grid.Column="0" IsChecked="{Binding ScanPhones}" VerticalOptions="Center"/>
-                            <Label Grid.Row="1" Grid.Column="1" Text="Phone Numbers" Style="{StaticResource Styles.ClickableLabel}">
-                                <Label.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding ScanPhonesToggleCommand}" />
-                                </Label.GestureRecognizers>
-                            </Label>
+                    <VerticalStackLayout Grid.Row="2" 
+                               IsVisible="{Binding IsAnalyzingContent, Converter={StaticResource InvertBoolConverter}}"
+                               Spacing="15">
 
-                            <CheckBox Grid.Row="2" Grid.Column="0" IsChecked="{Binding ScanSSNs}" VerticalOptions="Center"/>
-                            <Label Grid.Row="2" Grid.Column="1" Text="Social Security Numbers" Style="{StaticResource Styles.ClickableLabel}">
-                                <Label.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding ScanSSNsToggleCommand}" />
-                                </Label.GestureRecognizers>
-                            </Label>
+                        <!-- Document Statistics -->
+                        <Frame Style="{StaticResource Styles.CardFrame}" Padding="15">
+                            <VerticalStackLayout Spacing="10">
+                                <Label Text="Document Statistics" FontAttributes="Bold" FontSize="16"/>
+                                <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="8">
+                                    <Label Grid.Row="0" Grid.Column="0" Text="Word Count:" FontAttributes="Bold"/>
+                                    <Label Grid.Row="0" Grid.Column="1" Text="{Binding ContentAnalysis.WordCount}"/>
 
-                            <CheckBox Grid.Row="3" Grid.Column="0" IsChecked="{Binding ScanCreditCards}" VerticalOptions="Center"/>
-                            <Label Grid.Row="3" Grid.Column="1" Text="Credit Card Numbers" Style="{StaticResource Styles.ClickableLabel}">
-                                <Label.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding ScanCreditCardsToggleCommand}" />
-                                </Label.GestureRecognizers>
-                            </Label>
-                        </Grid>
+                                    <Label Grid.Row="1" Grid.Column="0" Text="Character Count:" FontAttributes="Bold"/>
+                                    <Label Grid.Row="1" Grid.Column="1" Text="{Binding ContentAnalysis.CharacterCount}"/>
 
-                        <BoxView Grid.Row="3" HeightRequest="1" Color="{StaticResource BorderColor}" Margin="0,15"/>
+                                    <Label Grid.Row="2" Grid.Column="0" Text="Line Count:" FontAttributes="Bold"/>
+                                    <Label Grid.Row="2" Grid.Column="1" Text="{Binding ContentAnalysis.LineCount}"/>
+                                </Grid>
+                            </VerticalStackLayout>
+                        </Frame>
 
-                        <VerticalStackLayout Grid.Row="4" Spacing="10">
-                            <Label Text="Redaction Style:" FontAttributes="Bold"/>
-                            <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto">
-                                <RadioButton Grid.Row="0" Grid.Column="0" IsChecked="{Binding UsePartialMasking}" GroupName="RedactionStyle"/>
-                                <Label Grid.Row="0" Grid.Column="1" Text="Partial Masking (e.g., show last 4 digits)" VerticalOptions="Center">
-                                    <Label.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding SetPartialMaskingCommand}" />
-                                    </Label.GestureRecognizers>
-                                </Label>
+                        <!-- Sentiment Analysis -->
+                        <Frame Style="{StaticResource Styles.CardFrame}" Padding="15">
+                            <VerticalStackLayout Spacing="10">
+                                <Label Text="Sentiment Analysis" FontAttributes="Bold" FontSize="16"/>
+                                <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="8">
+                                    <Label Grid.Row="0" Grid.Column="0" Text="Sentiment:" FontAttributes="Bold"/>
+                                    <Label Grid.Row="0" Grid.Column="1" Text="{Binding ContentAnalysis.SentimentLabel}"/>
 
-                                <RadioButton Grid.Row="1" Grid.Column="0" IsChecked="{Binding UseFullRedaction}" GroupName="RedactionStyle"/>
-                                <Label Grid.Row="1" Grid.Column="1" Text="Full Redaction (completely mask all data)" VerticalOptions="Center">
-                                    <Label.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding SetFullRedactionCommand}" />
-                                    </Label.GestureRecognizers>
-                                </Label>
-                            </Grid>
-                        </VerticalStackLayout>
+                                    <Label Grid.Row="1" Grid.Column="0" Text="Confidence Score:" FontAttributes="Bold"/>
+                                    <Label Grid.Row="1" Grid.Column="1" Text="{Binding ContentAnalysis.SentimentScore, StringFormat='{0:P1}'}"/>
+                                </Grid>
 
-                        <HorizontalStackLayout Grid.Row="5" HorizontalOptions="Center" Spacing="15" Margin="0,20,0,0">
-                            <Button Text="Cancel" Command="{Binding ToggleSettingsCommand}" Style="{StaticResource Styles.SecondaryButton}" WidthRequest="100"/>
-                            <Button Text="Apply Settings" Command="{Binding ApplySettingsCommand}" Style="{StaticResource Styles.AccentButton}" WidthRequest="150"/>
-                        </HorizontalStackLayout>
-                    </Grid>
-                </VerticalStackLayout>
+                                <!-- Sentiment Visualization Bar -->
+                                <Grid RowDefinitions="Auto,Auto" Margin="0,10,0,0">
+                                    <ProgressBar Progress="{Binding ContentAnalysis.SentimentScore}" 
+                                        ProgressColor="{Binding ContentAnalysis.SentimentScore, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#dc3545,#28a745'}" 
+                                        HeightRequest="20" />
+                                    <Grid Grid.Row="1" ColumnDefinitions="*, *, *" Margin="0,5,0,0">
+                                        <Label Grid.Column="0" Text="Negative" FontSize="12" TextColor="#dc3545" HorizontalOptions="Start"/>
+                                        <Label Grid.Column="1" Text="Neutral" FontSize="12" TextColor="#6c757d" HorizontalOptions="Center"/>
+                                        <Label Grid.Column="2" Text="Positive" FontSize="12" TextColor="#28a745" HorizontalOptions="End"/>
+                                    </Grid>
+                                </Grid>
+                            </VerticalStackLayout>
+                        </Frame>
+
+                        <!-- Key Phrases -->
+                        <Frame Style="{StaticResource Styles.CardFrame}" Padding="15">
+                            <VerticalStackLayout Spacing="10">
+                                <Label Text="Key Phrases" FontAttributes="Bold" FontSize="16"/>
+                                <CollectionView ItemsSource="{Binding ContentAnalysis.KeyPhrases}" SelectionMode="None">
+                                    <CollectionView.ItemTemplate>
+                                        <DataTemplate x:DataType="x:String">
+                                            <Frame Margin="2" Padding="8,4" BackgroundColor="#e9ecef" CornerRadius="5">
+                                                <Label Text="{Binding .}" TextColor="Black" FontSize="14"/>
+                                            </Frame>
+                                        </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+                                    <CollectionView.ItemsLayout>
+                                        <GridItemsLayout Orientation="Vertical" Span="2" HorizontalItemSpacing="5" VerticalItemSpacing="5"/>
+                                    </CollectionView.ItemsLayout>
+                                    <CollectionView.EmptyView>
+                                        <Label Text="No key phrases detected" TextColor="Gray" HorizontalOptions="Center"/>
+                                    </CollectionView.EmptyView>
+                                </CollectionView>
+                            </VerticalStackLayout>
+                        </Frame>
+                    </VerticalStackLayout>
+
+                    <Button Grid.Row="3" 
+                    Text="Close" 
+                    Command="{Binding ToggleContentOverviewCommand}" 
+                    Style="{StaticResource Styles.SecondaryButton}" 
+                    HorizontalOptions="Center"
+                    WidthRequest="120"/>
+                </Grid>
             </ScrollView>
         </Frame>
 
