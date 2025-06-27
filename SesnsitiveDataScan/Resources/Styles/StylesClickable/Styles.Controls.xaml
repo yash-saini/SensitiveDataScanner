@@ -2,7 +2,6 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
 
-    <!-- 🎨 Theme Colors -->
     <Color x:Key="PrimaryColor">#007acc</Color>
     <Color x:Key="AccentColor">#28a745</Color>
     <Color x:Key="SecondaryColor">#6c757d</Color>
@@ -10,7 +9,6 @@
     <Color x:Key="DarkBackground">#333333</Color>
     <Color x:Key="BorderColor">#cccccc</Color>
     
-    <!-- 📌 Section Header -->
     <Style x:Key="Styles.SectionHeader" TargetType="Label">
         <Setter Property="FontAttributes" Value="Bold" />
         <Setter Property="FontSize" Value="18" />
@@ -18,7 +16,6 @@
         <Setter Property="TextColor" Value="{AppThemeBinding Light=Black, Dark=White}" />
     </Style>
 
-    <!-- 🔘 Buttons -->
     <Style x:Key="Styles.PrimaryButton" TargetType="Button">
         <Setter Property="BackgroundColor" Value="{StaticResource PrimaryColor}" />
         <Setter Property="TextColor" Value="White" />
@@ -43,7 +40,6 @@
         <Setter Property="FontAttributes" Value="Bold" />
     </Style>
 
-    <!-- 🧾 Entry Filter Style -->
     <Style x:Key="Styles.FilterEntry" TargetType="Entry">
         <Setter Property="BackgroundColor" Value="#f0f0f0" />
         <Setter Property="FontAttributes" Value="Italic" />
@@ -51,8 +47,7 @@
         <Setter Property="TextColor" Value="Black" />
         <Setter Property="Margin" Value="0,5" />
     </Style>
-
-    <!-- 🔲 Frame for Data Type -->
+	
     <Style x:Key="Styles.DataTypeFrame" TargetType="Frame">
         <Setter Property="BackgroundColor" Value="LightGray" />
         <Setter Property="Padding" Value="8,4" />
@@ -62,4 +57,10 @@
         <Setter Property="HorizontalOptions" Value="Start" />
         <Setter Property="VerticalOptions" Value="Center" />
     </Style>
+
+	<Style x:Key="Styles.CardFrame" TargetType="Frame">
+		<Setter Property="BorderColor" Value="{StaticResource Gray200}" />
+		<Setter Property="CornerRadius" Value="10" />
+		<Setter Property="HasShadow" Value="True" />
+	</Style>
 </ResourceDictionary>  
