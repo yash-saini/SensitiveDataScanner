@@ -77,6 +77,7 @@ namespace SesnsitiveDataScan.ViewModels
         partial void OnIsDarkModeChanged(bool value)
         {
             Application.Current.UserAppTheme = value ? AppTheme.Dark : AppTheme.Light;
+            ThemeHelper.Instance.OnThemeChanged();
         }
 
         public ICommand ScanEmailsToggleCommand { get; }
@@ -111,6 +112,9 @@ namespace SesnsitiveDataScan.ViewModels
             SetFullRedactionCommand = new Command(SetFullRedaction);
             ToggleThemeCommand = new Command(ToggleTheme);
         }
+
+        [ObservableProperty]
+        private ThemeHelper themeHelper = ThemeHelper.Instance;
 
         [RelayCommand]
         private void ToggleContentOverview()
