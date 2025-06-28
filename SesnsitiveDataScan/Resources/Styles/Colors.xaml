@@ -28,6 +28,25 @@
     <Color x:Key="Gray900">#212121</Color>
     <Color x:Key="Gray950">#141414</Color>
 
+    <!-- Theme-aware colors -->
+    <Color x:Key="PageBackgroundLight">White</Color>
+    <Color x:Key="PageBackgroundDark">#1E1E1E</Color>
+
+    <Color x:Key="TextColorLight">Black</Color>
+    <Color x:Key="TextColorDark">White</Color>
+
+    <Color x:Key="CardBackgroundLight">#F7F7F7</Color>
+    <Color x:Key="CardBackgroundDark">#2D2D2D</Color>
+
+    <Color x:Key="DetectedItemBgLight">#F0F0F0</Color>
+    <Color x:Key="DetectedItemBgDark">#333333</Color>
+
+    <Color x:Key="BorderColorLight">#DDDDDD</Color>
+    <Color x:Key="BorderColorDark">#444444</Color>
+
+    <Color x:Key="KeyPhraseBackgroundLight">#E5DFF8</Color>
+    <Color x:Key="KeyPhraseBackgroundDark">#483D8B</Color>
+
     <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Primary}"/>
     <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource Secondary}"/>
     <SolidColorBrush x:Key="TertiaryBrush" Color="{StaticResource Tertiary}"/>
